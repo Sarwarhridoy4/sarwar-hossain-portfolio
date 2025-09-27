@@ -10,4 +10,6 @@ export const env = {
   JWT_SECRET_KEY: process.env.JWT_SECRET_KEY || "your_jwt_secret_key",
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "1d",
   DATABASE_URL: process.env.DATABASE_URL || "your_database_url",
+  ADMIN_EMAIL: process.env.ADMIN_EMAIL || "",
+  ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || "",
 };
