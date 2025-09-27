@@ -6,8 +6,10 @@ import express, {
   type NextFunction,
   Application,
 } from "express";
-import { UserRoutes } from "./app/modules/users/users.route";
 import { StatusCodes } from "http-status-codes";
+import { router } from "./routes";
+import { globalErrorHandler } from "./app/middlewares/globalerrorHandler";
+
 
 const app: Application = express();
 
@@ -22,7 +24,7 @@ app.use(compression());
 app.use(express.json());
 
 // Routes
-app.use("/api/v1/user", UserRoutes);
+app.use("/api/v1", router);
 
 // Default route for testing
 app.get("/", (_req: Request, res: Response) => {
@@ -40,12 +42,6 @@ app.use((req: Request, res: Response, _next: NextFunction) => {
 });
 
 // Global Error Handler
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  console.error(err);
-  res.status(err.status || 500).json({
-    success: false,
-    message: err.message || "Internal Server Error",
-  });
-});
+app.use(globalErrorHandler);
 
 export default app;
