@@ -18,6 +18,7 @@ async function main() {
       name: "System Admin",
       email: "admin@example.com",
       password: hashedPassword,
+      profilePicture: "https://picsum.photos/200",
       role: UserRole.ADMIN,
     },
   });

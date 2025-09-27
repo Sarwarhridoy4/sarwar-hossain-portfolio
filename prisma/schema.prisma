@@ -10,33 +10,38 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role     @default(USER)
-  resumes   Resume[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  Blog Blog[]
+  id              String   @id @default(uuid())
+  name            String   
+  email           String   @unique
+  password        String
+  role            Role     @default(USER)
+  profilePicture  String?  // optional profile picture
+  resumes         Resume[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   Project Project[]
+
+  Blog Blog[]
 }
 
 model Resume {
-  id        String   @id @default(uuid())
-  title     String
-  content   String   // JSON string or structured schema later
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String   @id @default(uuid())
+  title            String
+  content          String
+  professionalPhoto String?  // optional, can use user's profilePicture
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model Blog {
   id        String   @id @default(uuid())
   title     String
+  slug      String   @unique
+  tag       String
+  thumbnail String
   content   String
   authorId  String
   author    User     @relation(fields: [authorId], references: [id])
