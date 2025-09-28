@@ -1,15 +1,11 @@
 import compression from "compression";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import express, {
-  type Request,
-  type Response,
-  type NextFunction,
-  Application,
-} from "express";
+import express, { type Request, type Response, Application } from "express";
 import { StatusCodes } from "http-status-codes";
 import { router } from "./routes";
 import { globalErrorHandler } from "./app/middlewares/globalerrorHandler";
+import notFound from "./app/middlewares/notFound";
 
 const app: Application = express();
 
@@ -35,12 +31,7 @@ app.get("/", (_req: Request, res: Response) => {
 });
 
 // 404 Handler
-app.use((req: Request, res: Response, _next: NextFunction) => {
-  res.status(StatusCodes.NOT_FOUND).json({
-    success: false,
-    message: "Route Not Found",
-  });
-});
+app.use(notFound);
 
 // Global Error Handler
 app.use(globalErrorHandler);
