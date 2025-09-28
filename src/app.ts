@@ -6,13 +6,14 @@ import { StatusCodes } from "http-status-codes";
 import { router } from "./routes";
 import { globalErrorHandler } from "./app/middlewares/globalerrorHandler";
 import notFound from "./app/middlewares/notFound";
+import { env } from "./config/env";
 
 const app: Application = express();
 
 // Middleware
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: env.FRONTEND_URL,
     credentials: true,
   })
 );
