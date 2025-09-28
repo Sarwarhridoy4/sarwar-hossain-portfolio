@@ -16,3 +16,14 @@ export enum UserRole {
   USER = "USER",
 }
 
+export type SafeBlog = {
+  id: string;
+  title: string;
+  slug: string;
+  tags: string[]; // array of strings
+  content: string;
+  thumbnail: string; // Cloudinary URL
+  authorId: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
