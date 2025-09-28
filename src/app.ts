@@ -1,5 +1,6 @@
 import compression from "compression";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import express, {
   type Request,
   type Response,
@@ -9,7 +10,6 @@ import express, {
 import { StatusCodes } from "http-status-codes";
 import { router } from "./routes";
 import { globalErrorHandler } from "./app/middlewares/globalerrorHandler";
-
 
 const app: Application = express();
 
@@ -22,6 +22,7 @@ app.use(
 );
 app.use(compression());
 app.use(express.json());
+app.use(cookieParser());
 
 // Routes
 app.use("/api/v1", router);
