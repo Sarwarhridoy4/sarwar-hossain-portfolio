@@ -18,4 +18,6 @@ export const env = {
   ADMIN_EMAIL: process.env.ADMIN_EMAIL || "",
   ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || "",
   FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:3000",
+  FRONTEND_URL_PRODUCTION:
+    process.env.FRONTEND_URL_PRODUCTION || "http://localhost:3000",
 };
