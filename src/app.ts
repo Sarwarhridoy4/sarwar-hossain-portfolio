@@ -13,7 +13,7 @@ const app: Application = express();
 // Middleware
 app.use(
   cors({
-    origin: env.FRONTEND_URL,
+    origin: [env.FRONTEND_URL, env.FRONTEND_URL_PRODUCTION],
     credentials: true,
   })
 );
