@@ -28,7 +28,7 @@ export type SafeBlog = {
   updatedAt: Date;
 };
 
-// types/index.ts
+
 export type SafeProject = {
   id: string;
   title: string;
@@ -37,6 +37,26 @@ export type SafeProject = {
   techStack: string[];
   images: string[];
   authorId: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+
+
+export type SafeResume = {
+  id: string;
+  title: string;
+  summary: string | null;
+  professionalPhoto: string | null;
+
+  experiences: Record<string, any>[] | null; // array of objects for experiences
+  education: Record<string, any>[] | null;   // array of objects for education
+  skills: string[];                          // list of skills
+  projects: Record<string, any>[] | null;    // array of objects for projects
+  certifications: Record<string, any>[] | null; // array of objects for certifications
+  contactInfo: Record<string, any> | null;      // object with contact info
+
+  userId: string;
   createdAt: Date;
   updatedAt: Date;
 };
