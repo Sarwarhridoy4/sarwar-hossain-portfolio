@@ -4,7 +4,9 @@
 **Base URL:**
 
 ```
-http://localhost:5000/api/v1
+http://localhost:5000/api/v1 //localhost
+
+https://sarwar-portfolio-server-opal.vercel.app/api/v1 //deployed
 ```
 
 ---
