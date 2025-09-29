@@ -27,15 +27,26 @@ model User {
 }
 
 model Resume {
-  id               String   @id @default(uuid())
-  title            String
-  content          String
-  professionalPhoto String?  // optional, can use user's profilePicture
-  userId           String
-  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id                String   @id @default(uuid())
+  title             String
+  summary           String?   // short professional summary
+  professionalPhoto String?   // optional, can use user's profilePicture
+
+  // Structured resume sections as JSON for flexibility
+  experiences       Json?     // [{ company, role, startDate, endDate, description }]
+  education         Json?     // [{ institution, degree, startDate, endDate }]
+  skills            String[]  // list of skills
+  projects          Json?     // [{ title, description, techStack }]
+  certifications    Json?     // [{ title, issuer, date }]
+  contactInfo       Json?     // { phone, address, linkedin, github, portfolio }
+
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
+
 
 model Blog {
   id        String   @id @default(uuid())
