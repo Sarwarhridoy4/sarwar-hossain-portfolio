@@ -1,28 +1,28 @@
 import compression from "compression";
 import cors from "cors";
-import express, {
-  type Request,
-  type Response,
-  type NextFunction,
-  Application,
-} from "express";
-import { UserRoutes } from "./app/modules/users/users.route";
+import cookieParser from "cookie-parser";
+import express, { type Request, type Response, Application } from "express";
 import { StatusCodes } from "http-status-codes";
+import { router } from "./routes";
+import { globalErrorHandler } from "./app/middlewares/globalerrorHandler";
+import notFound from "./app/middlewares/notFound";
+import { env } from "./config/env";
 
 const app: Application = express();
 
 // Middleware
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: env.FRONTEND_URL,
     credentials: true,
   })
 );
 app.use(compression());
 app.use(express.json());
+app.use(cookieParser());
 
 // Routes
-app.use("/api/v1/user", UserRoutes);
+app.use("/api/v1", router);
 
 // Default route for testing
 app.get("/", (_req: Request, res: Response) => {
@@ -32,20 +32,9 @@ app.get("/", (_req: Request, res: Response) => {
 });
 
 // 404 Handler
-app.use((req: Request, res: Response, _next: NextFunction) => {
-  res.status(StatusCodes.NOT_FOUND).json({
-    success: false,
-    message: "Route Not Found",
-  });
-});
+app.use(notFound);
 
 // Global Error Handler
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  console.error(err);
-  res.status(err.status || 500).json({
-    success: false,
-    message: err.message || "Internal Server Error",
-  });
-});
+app.use(globalErrorHandler);
 
 export default app;

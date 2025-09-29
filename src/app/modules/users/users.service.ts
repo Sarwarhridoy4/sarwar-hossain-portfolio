@@ -1,100 +1,174 @@
-import { PrismaClient, type User } from "@prisma/client";
+import { PrismaClient, Role } from "@prisma/client";
 import bcryptjs from "bcryptjs";
+import AppError from "../../../helpers/errorhelper/AppError";
 import { env } from "../../../config/env";
+import { SafeUser } from "../../../types";
+import {
+  uploadBufferToCloudinary,
+  deleteImageFromCloudinary,
+} from "../../../config/cloudinary";
 
 const prisma = new PrismaClient();
 
-// Create user
-const createUser = async (payload: Partial<User>) => {
+const getAllUsers = async (): Promise<SafeUser[]> => {
+  return prisma.user.findMany({
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      profilePicture: true,
+      provider: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+};
+
+const getUserById = async (id: string): Promise<SafeUser> => {
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      profilePicture: true,
+      provider: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+  if (!user) throw new AppError(404, "User not found");
+  return user;
+};
+
+const createUser = async (
+  payload: {
+    name: string;
+    email: string;
+    password: string;
+    role?: Role;
+    provider?: string;
+  },
+  file?: Express.Multer.File
+): Promise<SafeUser> => {
+  const existing = await prisma.user.findUnique({
+    where: { email: payload.email },
+  });
+  if (existing) throw new AppError(400, "User already exists");
+
   const hashedPassword = await bcryptjs.hash(
-    payload.password as string,
+    payload.password,
     Number(env.BYCRYPT_SALT_ROUNDS)
-  ); // Hash the password before saving (implement hashing as needed)
+  );
+
+  let uploadedUrl: string | undefined;
+  if (file) {
+    const result = await uploadBufferToCloudinary(
+      file.buffer,
+      file.originalname,
+      "profile-image"
+    );
+    uploadedUrl = result.secure_url;
+  }
+
   const user = await prisma.user.create({
     data: {
-      name: payload.name!,
-      email: payload.email!,
-      password: hashedPassword!,
+      ...payload,
+      password: hashedPassword,
+      role: payload.role || "USER",
+      provider: payload.provider || "CREDENTIAL",
+      profilePicture: uploadedUrl,
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      profilePicture: true,
+      provider: true,
+      createdAt: true,
+      updatedAt: true,
     },
   });
+
   return user;
 };
 
-// Get all users
-const getAllUsers = async () => {
-  return await prisma.user.findMany({
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      phone: true,
-      // Exclude password
-    },
-  });
-};
+const updateUser = async (
+  id: string,
+  payload: Partial<{
+    name: string;
+    email: string;
+    password: string;
+    role: Role;
+    provider: string;
+  }>,
+  file?: Express.Multer.File
+): Promise<SafeUser> => {
+  const existing = await prisma.user.findUnique({ where: { id } });
+  if (!existing) throw new AppError(404, "User not found");
 
-// Get user by ID
-const getUserById = async (id: string) => {
-  // Convert string to number
-  const userId = Number(id);
+  const data: any = { ...payload };
 
-  if (isNaN(userId)) {
-    throw new Error("Invalid user ID");
+  if (payload.password) {
+    data.password = await bcryptjs.hash(
+      payload.password,
+      Number(env.BYCRYPT_SALT_ROUNDS)
+    );
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      phone: true,
-      // Exclude password
-    },
-  });
-  return user;
-};
+  if (file) {
+    // Upload new image
+    const result = await uploadBufferToCloudinary(
+      file.buffer,
+      file.originalname,
+      "profile-image"
+    );
+    data.profilePicture = result.secure_url;
 
-// Update user by ID
-const updateUserById = async (id: string, data: Partial<User>) => {
-  const userId = Number(id);
-  if (isNaN(userId)) {
-    throw new Error("Invalid user ID");
+    // Delete old image
+    if (existing.profilePicture) {
+      await deleteImageFromCloudinary(existing.profilePicture);
+    }
   }
 
-  const updatedUser = await prisma.user.update({
-    where: { id: userId },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      phone: true,
-      // Exclude password
-    },
+  return prisma.user.update({
+    where: { id },
     data,
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      profilePicture: true,
+      provider: true,
+      createdAt: true,
+      updatedAt: true,
+    },
   });
-
-  return updatedUser;
 };
 
-// Delete user by ID
-const deleteUserById = async (id: string) => {
-  const userId = Number(id);
-  if (isNaN(userId)) {
-    throw new Error("Invalid user ID");
+const deleteUser = async (id: string) => {
+  const existing = await prisma.user.findUnique({ where: { id } });
+  if (!existing) throw new AppError(404, "User not found");
+
+  // Delete image if exists
+  if (existing.profilePicture) {
+    await deleteImageFromCloudinary(existing.profilePicture);
   }
 
-  const deletedUser = await prisma.user.delete({
-    where: { id: userId },
-  });
+  // Delete DB user
+  await prisma.user.delete({ where: { id } });
 
-  return deletedUser;
+  return { message: "User deleted successfully" };
 };
 
-export const UserServices = {
-  createUser,
+export const UserService = {
   getAllUsers,
   getUserById,
-  updateUserById,
-  deleteUserById,
+  createUser,
+  updateUser,
+  deleteUser,
 };

@@ -1,13 +1,36 @@
-import type { Request, Response } from "express";
-import { StatusCodes } from "http-status-codes";
+// controllers/user.controller.ts
+import { Request, Response } from "express";
 import { catchAsync } from "../../../utils/catchAsync";
-import { UserServices } from "./users.service";
 import { sendResponse } from "../../../utils/sendResponse";
+import { UserService } from "./users.service";
+import { SafeUser } from "../../../types";
+import { StatusCodes } from "http-status-codes";
 
+// Get all users
+const getAllUsers = catchAsync(async (req: Request, res: Response) => {
+  const users = await UserService.getAllUsers();
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "Users fetched successfully",
+    data: users,
+  });
+});
 
-// Create user
+// Get a single user by ID
+const getUser = catchAsync(async (req: Request, res: Response) => {
+  const user: SafeUser = await UserService.getUserById(req.params.id);
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "User fetched successfully",
+    data: user,
+  });
+});
+
+// Create a new user (Admin only)
 const createUser = catchAsync(async (req: Request, res: Response) => {
-  const user = await UserServices.createUser(req.body);
+  const user: SafeUser = await UserService.createUser(req.body, req.file);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.CREATED,
@@ -16,62 +39,36 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
-
-// Get all users
-const getAllUsers = catchAsync(async (req: Request, res: Response) => {
-  const users = await UserServices.getAllUsers();
+// Update an existing user (Admin only)
+const updateUser = catchAsync(async (req: Request, res: Response) => {
+  const user: SafeUser = await UserService.updateUser(
+    req.params.id,
+    req.body,
+    req.file
+  );
   sendResponse(res, {
-    statusCode: StatusCodes.OK,
     success: true,
-    message: "Users fetched successfully",
-    data: users,
-  });
-});
-
-
-
-
-// Get user by ID
-const getUserById = catchAsync(async (req: Request, res: Response) => {
-  const user = await UserServices.getUserById(req.params.id as string);
-  sendResponse(res, {
     statusCode: StatusCodes.OK,
-    success: true,
-    message: "User fetched successfully",
+    message: "User updated successfully",
     data: user,
   });
 });
 
-// Update user by ID
-const updateUserById = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params as { id: string };
-  const updateData = req.body;
-
-  const updatedUser = await UserServices.updateUserById(id, updateData);
-  sendResponse(res, {
-    statusCode: StatusCodes.OK,
-    success: true,
-    message: "User updated successfully",
-    data: updatedUser,
-  });
-});
-
-// Delete user
+// Delete a user (Admin only)
 const deleteUser = catchAsync(async (req: Request, res: Response) => {
-  const result = await UserServices.deleteUserById(req.params.id as string);
+  const result = await UserService.deleteUser(req.params.id);
   sendResponse(res, {
-    statusCode: StatusCodes.OK,
     success: true,
-    message: "User deleted successfully",
-    data: result,
+    statusCode: StatusCodes.OK,
+    message: result.message,
+    data: null,
   });
 });
 
 export const UserControllers = {
-  createUser,
   getAllUsers,
-  getUserById,
-  updateUserById,
+  getUser,
+  createUser,
+  updateUser,
   deleteUser,
 };

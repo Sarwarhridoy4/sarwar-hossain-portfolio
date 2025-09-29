@@ -1,12 +1,7 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// prisma/schema.prisma
 
 generator client {
   provider = "prisma-client-js"
-  
 }
 
 datasource db {
@@ -14,19 +9,74 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  USER
-  AGENT
-  ADMIN
+model User {
+  id              String   @id @default(uuid())
+  name            String   
+  email           String   @unique
+  password        String
+  role            Role     @default(USER)
+  profilePicture  String?  // optional profile picture
+  provider        String    @default("CREDENTIAL") // "GOOGLE" | "GITHUB" | "CREDENTIAL"
+  resumes         Resume[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  Project Project[]
+
+  Blog Blog[]
 }
 
-model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  phone     String?  @unique
-  password  String
-  role      Role     @default(USER)
+model Resume {
+  id                String   @id @default(uuid())
+  title             String
+  summary           String?   // short professional summary
+  professionalPhoto String?   // optional, can use user's profilePicture
+
+  // Structured resume sections as JSON for flexibility
+  experiences       Json?     // [{ company, role, startDate, endDate, description }]
+  education         Json?     // [{ institution, degree, startDate, endDate }]
+  skills            String[]  // list of skills
+  projects          Json?     // [{ title, description, techStack }]
+  certifications    Json?     // [{ title, issuer, date }]
+  contactInfo       Json?     // { phone, address, linkedin, github, portfolio }
+
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+
+model Blog {
+  id        String   @id @default(uuid())
+  title     String
+  slug      String   @unique
+  tags      String[] @default([])
+  thumbnail String
+  content   String
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+
+model Project {
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  description String
+  techStack   String[]        // Array of technologies used
+  images      String[]        // Cloudinary URLs of screenshots
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+
+enum Role {
+  ADMIN
+  USER
 }
