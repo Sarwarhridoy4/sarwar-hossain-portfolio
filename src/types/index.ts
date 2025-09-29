@@ -27,3 +27,17 @@ export type SafeBlog = {
   createdAt: Date;
   updatedAt: Date;
 };
+
+// types/index.ts
+export type SafeProject = {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  techStack: string[];
+  images: string[];
+  authorId: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+

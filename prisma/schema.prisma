@@ -52,14 +52,18 @@ model Blog {
 
 
 model Project {
-  id        String   @id @default(uuid())
-  title     String
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
   description String
-  authorId  String
-  author    User     @relation(fields: [authorId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  techStack   String[]        // Array of technologies used
+  images      String[]        // Cloudinary URLs of screenshots
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
+
 
 enum Role {
   ADMIN
