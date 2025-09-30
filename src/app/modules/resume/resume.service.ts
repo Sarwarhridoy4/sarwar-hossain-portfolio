@@ -21,6 +21,23 @@ const getAllResumes = async (): Promise<SafeResume[]> => {
   }));
 };
 
+// services/resume.service.ts
+const getResumesByUser = async (email: string): Promise<SafeResume[]> => {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) throw new AppError(404, "User not found");
+
+  const resumes = await prisma.resume.findMany({ where: { userId: user.id } });
+
+  return resumes.map((r) => ({
+    ...r,
+    experiences: r.experiences as Record<string, any>[] | null,
+    education: r.education as Record<string, any>[] | null,
+    projects: r.projects as Record<string, any>[] | null,
+    certifications: r.certifications as Record<string, any>[] | null,
+    contactInfo: r.contactInfo as Record<string, any> | null,
+  }));
+};
+
 const getResumeById = async (id: string): Promise<SafeResume> => {
   const resume = await prisma.resume.findUnique({ where: { id } });
   if (!resume) throw new AppError(404, "Resume not found");
@@ -146,6 +163,7 @@ const deleteResume = async (id: string) => {
 
 export const ResumeService = {
   getAllResumes,
+  getResumesByUser,
   getResumeById,
   createResume,
   updateResume,

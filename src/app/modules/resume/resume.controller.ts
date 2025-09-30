@@ -17,6 +17,21 @@ const getAllResumes = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// Get all resumes for the logged-in user
+const getUserResumes = catchAsync(async (req: Request, res: Response) => {
+  if (!req.user?.email) throw new Error("Unauthorized");
+
+  const resumes: SafeResume[] = await ResumeService.getResumesByUser(
+    req.user.email
+  );
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "User resumes fetched successfully",
+    data: resumes,
+  });
+});
+
 // Get a single resume by ID
 const getResume = catchAsync(async (req: Request, res: Response) => {
   const resume: SafeResume = await ResumeService.getResumeById(req.params.id);
@@ -30,7 +45,10 @@ const getResume = catchAsync(async (req: Request, res: Response) => {
 
 // Create a new resume
 const createResume = catchAsync(async (req: Request, res: Response) => {
-  const resume: SafeResume = await ResumeService.createResume(req.body, req.file);
+  const resume: SafeResume = await ResumeService.createResume(
+    req.body,
+    req.file
+  );
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.CREATED,
@@ -67,6 +85,7 @@ const deleteResume = catchAsync(async (req: Request, res: Response) => {
 
 export const ResumeControllers = {
   getAllResumes,
+  getUserResumes,
   getResume,
   createResume,
   updateResume,
