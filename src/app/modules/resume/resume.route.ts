@@ -13,6 +13,13 @@ router.get(
   protectNextAuth([UserRole.ADMIN]),
   ResumeControllers.getAllResumes
 ); // Get all resumes
+
+router.get(
+  "/user",
+  protectNextAuth([UserRole.USER]),
+  ResumeControllers.getUserResumes
+);
+
 router.get(
   "/:id",
   protectNextAuth([UserRole.ADMIN, UserRole.USER]),

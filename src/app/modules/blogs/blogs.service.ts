@@ -147,10 +147,32 @@ const deleteBlog = async (id: string) => {
   return { message: "Blog deleted successfully" };
 };
 
+const incrementBlogView = async (blogId: string) => {
+  const today = new Date();
+  const dateOnly = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
+  );
+
+  return await prisma.$transaction([
+    prisma.blog.update({
+      where: { id: blogId },
+      data: { views: { increment: 1 } },
+    }),
+    prisma.blogView.upsert({
+      where: { blogId_date: { blogId, date: dateOnly } },
+      update: { count: { increment: 1 } },
+      create: { blogId, date: dateOnly, count: 1 },
+    }),
+  ]);
+};
+
 export const BlogService = {
   getAllBlogs,
   getBlogById,
   createBlog,
   updateBlog,
   deleteBlog,
+  incrementBlogView,
 };
