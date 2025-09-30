@@ -22,13 +22,31 @@ const getProjectById = catchAsync(async (req: Request, res: Response) => {
 });
 
 const createProject = catchAsync(async (req: Request, res: Response) => {
-  const { title, slug, description, techStack, authorId } = req.body;
+  const {
+    title,
+    slug,
+    description,
+    videoUrl,
+    liveUrl,
+    repoUrl,
+    techStack,
+    authorId,
+  } = req.body;
 
   const parsedTechStack =
     typeof techStack === "string" ? JSON.parse(techStack) : techStack;
 
   const project = await ProjectService.createProject(
-    { title, slug, description, techStack: parsedTechStack, authorId },
+    {
+      title,
+      slug,
+      description,
+      videoUrl,
+      liveUrl,
+      repoUrl,
+      techStack: parsedTechStack,
+      authorId,
+    },
     req.files as Express.Multer.File[]
   );
 
@@ -41,14 +59,23 @@ const createProject = catchAsync(async (req: Request, res: Response) => {
 
 const updateProject = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { title, slug, description, techStack } = req.body;
+  const { title, slug, description, techStack, videoUrl, liveUrl, repoUrl } =
+    req.body;
 
   const parsedTechStack =
     typeof techStack === "string" ? JSON.parse(techStack) : techStack;
 
   const project = await ProjectService.updateProject(
     id,
-    { title, slug, description, techStack: parsedTechStack },
+    {
+      title,
+      slug,
+      description,
+      videoUrl,
+      repoUrl,
+      liveUrl,
+      techStack: parsedTechStack,
+    },
     req.files as Express.Multer.File[]
   );
 

@@ -57,6 +57,7 @@ model Blog {
   content   String
   authorId  String
   author    User     @relation(fields: [authorId], references: [id])
+  views    Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -71,6 +72,9 @@ model Project {
   images      String[]        // Cloudinary URLs of screenshots
   authorId    String
   author      User     @relation(fields: [authorId], references: [id])
+  videoUrl   String?  // Optional demo video URL
+  liveUrl    String?  // Optional live project URL
+  repoUrl    String?  // Optional repository URL
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

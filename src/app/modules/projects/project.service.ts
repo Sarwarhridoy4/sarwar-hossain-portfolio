@@ -27,6 +27,9 @@ const createProject = async (
     description: string;
     techStack: string[];
     authorId: string;
+    videoUrl?: string;
+    liveUrl?: string;
+    repoUrl?: string;
   },
   files?: Express.Multer.File[]
 ): Promise<SafeProject> => {
@@ -57,6 +60,9 @@ const updateProject = async (
     title: string;
     slug: string;
     description: string;
+    videoUrl?: string;
+    liveUrl?: string;
+    repoUrl?: string;
     techStack: string[];
   }>,
   files?: Express.Multer.File[]
