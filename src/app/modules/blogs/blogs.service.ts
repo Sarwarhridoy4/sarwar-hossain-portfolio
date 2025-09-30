@@ -19,6 +19,7 @@ const getAllBlogs = async (): Promise<SafeBlog[]> => {
       thumbnail: true,
       content: true,
       authorId: true,
+      views: true,
       createdAt: true,
       updatedAt: true,
     },
@@ -26,22 +27,32 @@ const getAllBlogs = async (): Promise<SafeBlog[]> => {
 };
 
 const getBlogById = async (id: string): Promise<SafeBlog> => {
-  const blog = await prisma.blog.findUnique({
-    where: { id },
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      tags: true,
-      thumbnail: true,
-      content: true,
-      authorId: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-  });
-  if (!blog) throw new AppError(404, "Blog not found");
-  return blog;
+  const [updatedBlog] = await prisma.$transaction([
+    prisma.blog.update({
+      where: { id },
+      data: {
+        views: {
+          increment: 1, // safely increment views
+        },
+      },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        tags: true,
+        thumbnail: true,
+        content: true,
+        authorId: true,
+        views: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    }),
+  ]);
+
+  if (!updatedBlog) throw new AppError(404, "Blog not found");
+
+  return updatedBlog;
 };
 
 const createBlog = async (
@@ -72,6 +83,7 @@ const createBlog = async (
       thumbnail: true,
       content: true,
       authorId: true,
+      views: true,
       createdAt: true,
       updatedAt: true,
     },
@@ -115,6 +127,7 @@ const updateBlog = async (
       thumbnail: true,
       content: true,
       authorId: true,
+      views: true,
       createdAt: true,
       updatedAt: true,
     },
