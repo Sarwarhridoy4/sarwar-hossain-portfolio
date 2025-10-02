@@ -2,12 +2,14 @@ import { Router } from "express";
 import { UserControllers } from "./auth.controller";
 import { validateRequest } from "../../middlewares/validateRequest";
 import { signupSchema, loginSchema } from "./auth.validator";
+import { multerUpload } from "../../../config/multer";
 
 const router = Router();
 
 // ✅ Signup
 router.post(
   "/signup",
+  multerUpload.single("profilePicture"), // Optional file
   validateRequest(signupSchema),
   UserControllers.createUser
 );

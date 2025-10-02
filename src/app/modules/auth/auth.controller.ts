@@ -6,7 +6,14 @@ import { AuthServices } from "./auth.service";
 
 // ✅ Create user
 const createUser = catchAsync(async (req: Request, res: Response) => {
-  const user = await AuthServices.signupUser(req.body);
+  const { file } = req; 
+  const userPayload = {
+    ...req.body,
+    profilePicture: file?.filename || null, 
+  };
+
+  const user = await AuthServices.signupUser(userPayload);
+
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.CREATED,
@@ -16,15 +23,17 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
 });
 
 // ✅ Login with email + password
-const loginWithEmailAndPassword = catchAsync(async (req: Request, res: Response) => {
-  const user = await AuthServices.loginWithEmailAndPassword(req.body);
-  sendResponse(res, {
-    success: true,
-    statusCode: StatusCodes.OK,
-    message: "Login successful",
-    data: user,
-  });
-});
+const loginWithEmailAndPassword = catchAsync(
+  async (req: Request, res: Response) => {
+    const user = await AuthServices.loginWithEmailAndPassword(req.body);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Login successful",
+      data: user,
+    });
+  }
+);
 
 // ✅ Auth with Google
 const authWithGoogle = catchAsync(async (req: Request, res: Response) => {

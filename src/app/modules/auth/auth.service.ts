@@ -12,7 +12,7 @@ const signupUser = async (payload: {
   name: string;
   email: string;
   password: string;
-  profilePicture?: string;
+  profilePicture?: string | null;
 }) => {
   const existingUser = await prisma.user.findUnique({
     where: { email: payload.email },
