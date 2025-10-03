@@ -21,6 +21,9 @@ router.post(
   UserControllers.loginWithEmailAndPassword
 );
 
+// ✅ Token refresh
+router.post("/refresh-token", UserControllers.refreshToken);
+
 // ✅ Social login (Google)
 router.post("/google", UserControllers.authWithGoogle);
 

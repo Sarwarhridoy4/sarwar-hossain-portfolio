@@ -9,6 +9,10 @@ export type SafeUser = {
   provider: string; // "CREDENTIAL" | "GOOGLE" | "GITHUB"
   createdAt: Date;
   updatedAt: Date;
+  tokens: {
+    accessToken: string;
+    refreshToken: string;
+  };
 };
 
 export enum UserRole {

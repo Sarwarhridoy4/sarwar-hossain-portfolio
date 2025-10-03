@@ -1,14 +1,14 @@
 import { Router } from "express";
-import { protectNextAuth } from "../../../middlewares/nextAuthMiddleware";
 import { StatsController } from "./blogstats.controller";
 import { UserRole } from "../../../../types";
+import { checkAuth } from "../../../middlewares/checkAuth";
 const router = Router();
 
 // Admin-only stats routes
 
 router.get(
   "/blogs",
-  protectNextAuth([UserRole.ADMIN]),
+  checkAuth(UserRole.ADMIN),
   StatsController.getBlogStats
 );
 

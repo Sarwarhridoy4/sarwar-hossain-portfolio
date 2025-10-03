@@ -1,34 +1,30 @@
 import { Router } from "express";
 import { BlogControllers } from "./blogs.controller";
-import { protectNextAuth } from "../../middlewares/nextAuthMiddleware";
 import { UserRole } from "../../../types";
 import { multerUpload } from "../../../config/multer";
+import { checkAuth } from "../../middlewares/checkAuth";
 
 const router = Router();
 
 // Public routes
-router.get("/", BlogControllers.getAllBlogs); 
-router.get("/:id", BlogControllers.getBlogById); 
+router.get("/", BlogControllers.getAllBlogs);
+router.get("/:id", BlogControllers.getBlogById);
 
 // Admin protected routes
 router.post(
   "/",
-  protectNextAuth([UserRole.ADMIN]),
+  checkAuth(UserRole.ADMIN),
   multerUpload.single("thumbnail"),
   BlogControllers.createBlog
 );
 
 router.put(
   "/:id",
-  protectNextAuth([UserRole.ADMIN]),
+  checkAuth(UserRole.ADMIN),
   multerUpload.single("thumbnail"),
   BlogControllers.updateBlog
 );
 
-router.delete(
-  "/:id",
-  protectNextAuth([UserRole.ADMIN]),
-  BlogControllers.deleteBlog
-);
+router.delete("/:id", checkAuth(UserRole.ADMIN), BlogControllers.deleteBlog);
 
 export const BlogRoutes = router;

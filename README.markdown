@@ -3,6 +3,7 @@
 A robust backend API for managing a portfolio application, built with modern technologies to handle user authentication, blogs, projects, and resumes. This API powers a portfolio website with secure, role-based access and seamless integration with Cloudinary for file uploads.
 
 ## 📚 Table of Contents
+
 - [Overview](#overview)
 - [Tech Stack](#tech-stack)
 - [Base URLs](#base-urls)
@@ -22,9 +23,11 @@ A robust backend API for managing a portfolio application, built with modern tec
 - [License](#license)
 
 ## Overview
+
 This project is the backend for Sarwar Hossain's portfolio, providing RESTful API endpoints to manage users, blogs, projects, and resumes. It uses NextAuth for authentication, Prisma for database operations, and Cloudinary for file storage. The API enforces role-based access control, with `ADMIN` and `USER` roles, and supports file uploads for profile pictures, blog thumbnails, project images, and resume photos.
 
 ## Tech Stack
+
 - **Node.js**: JavaScript runtime for server-side development
 - **Express**: Web framework for building RESTful APIs
 - **TypeScript**: Static typing for enhanced code reliability
@@ -35,10 +38,12 @@ This project is the backend for Sarwar Hossain's portfolio, providing RESTful AP
 - **Multer**: Middleware for handling file uploads
 
 ## Base URLs
+
 - **Local**: `http://localhost:5000/api/v1`
 - **Deployed**: `https://sarwar-portfolio-server-opal.vercel.app/api/v1`
 
 ## Authentication
+
 All protected routes require a NextAuth session cookie. Include it in the request header as follows:
 
 ```
@@ -52,12 +57,15 @@ Cookie: next-auth.session-token=<JWT_COOKIE>
 ## API Endpoints
 
 ### Auth API
+
 Handles user signup and login. Authentication is managed via NextAuth, with JWT session tokens stored in cookies.
 
 #### Signup
+
 ```
 POST /auth/signup
 ```
+
 - **Access**: Public
 - **Description**: Creates a new user account.
 - **Request Body** (JSON):
@@ -88,9 +96,11 @@ POST /auth/signup
   ```
 
 #### Login
+
 ```
 POST /auth/login
 ```
+
 - **Access**: Public
 - **Description**: Authenticates a user and returns a JWT token.
 - **Request Body** (JSON):
@@ -113,9 +123,11 @@ POST /auth/login
   ```
 
 ### Users API
+
 Manages user accounts. All routes require `ADMIN` role.
 
 #### User Model
+
 ```prisma
 model User {
   id              String   @id @default(uuid())
@@ -131,6 +143,7 @@ model User {
 ```
 
 #### SafeUser Type
+
 ```typescript
 export type SafeUser = {
   id: string;
@@ -145,9 +158,11 @@ export type SafeUser = {
 ```
 
 #### Get All Users
+
 ```
 GET /users
 ```
+
 - **Access**: Admin
 - **Description**: Retrieves a list of all users.
 - **Example**:
@@ -177,9 +192,11 @@ GET /users
   ```
 
 #### Get Single User
+
 ```
 GET /users/:id
 ```
+
 - **Access**: Admin
 - **Description**: Retrieves a user by ID.
 - **Example**:
@@ -193,24 +210,28 @@ GET /users/:id
     "success": true,
     "statusCode": 200,
     "message": "User fetched successfully",
-    "data": { /* SafeUser object */ }
+    "data": {
+      /* SafeUser object */
+    }
   }
   ```
 
 #### Create User
+
 ```
 POST /users
 ```
+
 - **Access**: Admin
 - **Description**: Creates a new user with an optional profile picture.
 - **Request Body** (multipart/form-data):
-  | Field          | Type   | Required |
+  | Field | Type | Required |
   |----------------|--------|----------|
-  | name           | string | Yes      |
-  | email          | string | Yes      |
-  | password       | string | Yes      |
-  | role           | string | No       |
-  | profilePicture | file   | No       |
+  | name | string | Yes |
+  | email | string | Yes |
+  | password | string | Yes |
+  | role | string | No |
+  | profilePicture | file | No |
 - **Example**:
   ```bash
   curl -X POST http://localhost:5000/api/v1/users \
@@ -227,14 +248,18 @@ POST /users
     "success": true,
     "statusCode": 201,
     "message": "User created successfully",
-    "data": { /* SafeUser object */ }
+    "data": {
+      /* SafeUser object */
+    }
   }
   ```
 
 #### Update User
+
 ```
 PUT /users/:id
 ```
+
 - **Access**: Admin
 - **Description**: Updates user details. Replaces profile picture if provided (old picture deleted from Cloudinary).
 - **Request Body**: Same as Create User, all fields optional.
@@ -251,14 +276,18 @@ PUT /users/:id
     "success": true,
     "statusCode": 200,
     "message": "User updated successfully",
-    "data": { /* Updated SafeUser object */ }
+    "data": {
+      /* Updated SafeUser object */
+    }
   }
   ```
 
 #### Delete User
+
 ```
 DELETE /users/:id
 ```
+
 - **Access**: Admin
 - **Description**: Deletes a user and their associated resources.
 - **Example**:
@@ -277,9 +306,11 @@ DELETE /users/:id
   ```
 
 ### Blogs API
+
 Manages blog posts with thumbnail uploads.
 
 #### Blog Model
+
 ```prisma
 model Blog {
   id        String   @id @default(uuid())
@@ -296,6 +327,7 @@ model Blog {
 ```
 
 #### SafeBlog Type
+
 ```typescript
 export type SafeBlog = {
   id: string;
@@ -311,9 +343,11 @@ export type SafeBlog = {
 ```
 
 #### Get All Blogs
+
 ```
 GET /blogs
 ```
+
 - **Access**: Public
 - **Description**: Retrieves all blogs.
 - **Example**:
@@ -326,14 +360,18 @@ GET /blogs
     "success": true,
     "statusCode": 200,
     "message": "Blogs fetched successfully",
-    "data": [ /* Array of SafeBlog objects */ ]
+    "data": [
+      /* Array of SafeBlog objects */
+    ]
   }
   ```
 
 #### Get Single Blog
+
 ```
 GET /blogs/:id
 ```
+
 - **Access**: Public
 - **Description**: Retrieves a blog by ID.
 - **Example**:
@@ -346,24 +384,28 @@ GET /blogs/:id
     "success": true,
     "statusCode": 200,
     "message": "Blog fetched successfully",
-    "data": { /* SafeBlog object */ }
+    "data": {
+      /* SafeBlog object */
+    }
   }
   ```
 
 #### Create Blog
+
 ```
 POST /blogs
 ```
+
 - **Access**: Auth (Admin only)
 - **Description**: Creates a new blog with a thumbnail.
 - **Request Body** (multipart/form-data):
-  | Field     | Type     | Required |
+  | Field | Type | Required |
   |-----------|----------|----------|
-  | title     | string   | Yes      |
-  | slug      | string   | Yes      |
-  | content   | string   | Yes      |
-  | tag       | string[] | No       |
-  | thumbnail | file     | Yes      |
+  | title | string | Yes |
+  | slug | string | Yes |
+  | content | string | Yes |
+  | tag | string[] | No |
+  | thumbnail | file | Yes |
 - **Validation**: Title min 3 chars, content min 50 chars, tags array of strings.
 - **Example**:
   ```bash
@@ -382,14 +424,18 @@ POST /blogs
     "success": true,
     "statusCode": 201,
     "message": "Blog created successfully",
-    "data": { /* SafeBlog object */ }
+    "data": {
+      /* SafeBlog object */
+    }
   }
   ```
 
 #### Update Blog
+
 ```
 PUT /blogs/:id
 ```
+
 - **Access**: Auth (Admin only)
 - **Description**: Updates a blog. Replaces thumbnail if provided (old deleted).
 - **Request Body**: Same as Create Blog, all fields optional.
@@ -406,14 +452,18 @@ PUT /blogs/:id
     "success": true,
     "statusCode": 200,
     "message": "Blog updated successfully",
-    "data": { /* Updated SafeBlog object */ }
+    "data": {
+      /* Updated SafeBlog object */
+    }
   }
   ```
 
 #### Delete Blog
+
 ```
 DELETE /blogs/:id
 ```
+
 - **Access**: Auth (Admin only)
 - **Description**: Deletes a blog and its thumbnail.
 - **Example**:
@@ -432,9 +482,11 @@ DELETE /blogs/:id
   ```
 
 ### Projects API
+
 Manages projects with multiple image uploads.
 
 #### Project Model
+
 ```prisma
 model Project {
   id          String   @id @default(uuid())
@@ -450,6 +502,7 @@ model Project {
 ```
 
 #### SafeProject Type
+
 ```typescript
 export type SafeProject = {
   id: string;
@@ -464,9 +517,11 @@ export type SafeProject = {
 ```
 
 #### Get All Projects
+
 ```
 GET /projects
 ```
+
 - **Access**: Public
 - **Description**: Retrieves all projects.
 - **Example**:
@@ -479,14 +534,18 @@ GET /projects
     "success": true,
     "statusCode": 200,
     "message": "Projects fetched successfully",
-    "data": [ /* Array of SafeProject objects */ ]
+    "data": [
+      /* Array of SafeProject objects */
+    ]
   }
   ```
 
 #### Get Single Project
+
 ```
 GET /projects/:id
 ```
+
 - **Access**: Public
 - **Description**: Retrieves a project by ID.
 - **Example**:
@@ -499,23 +558,27 @@ GET /projects/:id
     "success": true,
     "statusCode": 200,
     "message": "Project fetched successfully",
-    "data": { /* SafeProject object */ }
+    "data": {
+      /* SafeProject object */
+    }
   }
   ```
 
 #### Create Project
+
 ```
 POST /projects
 ```
+
 - **Access**: Auth (Admin only)
 - **Description**: Creates a new project with optional images.
 - **Request Body** (multipart/form-data):
-  | Field       | Type     | Required |
+  | Field | Type | Required |
   |-------------|----------|----------|
-  | title       | string   | Yes      |
-  | description | string   | Yes      |
-  | techStack   | string[] | No       |
-  | images      | file[]   | No       |
+  | title | string | Yes |
+  | description | string | Yes |
+  | techStack | string[] | No |
+  | images | file[] | No |
 - **Example**:
   ```bash
   curl -X POST http://localhost:5000/api/v1/projects \
@@ -533,14 +596,18 @@ POST /projects
     "success": true,
     "statusCode": 201,
     "message": "Project created successfully",
-    "data": { /* SafeProject object */ }
+    "data": {
+      /* SafeProject object */
+    }
   }
   ```
 
 #### Update Project
+
 ```
 PUT /projects/:id
 ```
+
 - **Access**: Auth (Admin only)
 - **Description**: Updates a project. Replaces images if provided (old deleted).
 - **Request Body**: Same as Create Project, all fields optional.
@@ -557,14 +624,18 @@ PUT /projects/:id
     "success": true,
     "statusCode": 200,
     "message": "Project updated successfully",
-    "data": { /* Updated SafeProject object */ }
+    "data": {
+      /* Updated SafeProject object */
+    }
   }
   ```
 
 #### Delete Project
+
 ```
 DELETE /projects/:id
 ```
+
 - **Access**: Auth (Admin only)
 - **Description**: Deletes a project and its images.
 - **Example**:
@@ -583,9 +654,11 @@ DELETE /projects/:id
   ```
 
 ### Resume API
+
 Manages user resumes with flexible JSON fields and photo uploads.
 
 #### Resume Model
+
 ```prisma
 model Resume {
   id                String   @id @default(uuid())
@@ -606,6 +679,7 @@ model Resume {
 ```
 
 #### SafeResume Type
+
 ```typescript
 export type SafeResume = {
   id: string;
@@ -625,9 +699,11 @@ export type SafeResume = {
 ```
 
 #### Get All Resumes
+
 ```
 GET /resumes
 ```
+
 - **Access**: Auth (Admin only)
 - **Description**: Retrieves all resumes.
 - **Example**:
@@ -641,14 +717,18 @@ GET /resumes
     "success": true,
     "statusCode": 200,
     "message": "Resumes fetched successfully",
-    "data": [ /* Array of SafeResume objects */ ]
+    "data": [
+      /* Array of SafeResume objects */
+    ]
   }
   ```
 
 #### Get Single Resume
+
 ```
 GET /resumes/:id
 ```
+
 - **Access**: Auth (Admin or owner)
 - **Description**: Retrieves a resume by ID.
 - **Example**:
@@ -662,28 +742,32 @@ GET /resumes/:id
     "success": true,
     "statusCode": 200,
     "message": "Resume fetched successfully",
-    "data": { /* SafeResume object */ }
+    "data": {
+      /* SafeResume object */
+    }
   }
   ```
 
 #### Create Resume
+
 ```
 POST /resumes
 ```
+
 - **Access**: Auth (Admin or User)
 - **Description**: Creates a new resume with optional photo and JSON fields.
 - **Request Body** (multipart/form-data):
-  | Field              | Type       | Required |
+  | Field | Type | Required |
   |--------------------|------------|----------|
-  | title              | string     | Yes      |
-  | summary            | string     | No       |
-  | skills             | string[]   | Yes      |
-  | professionalPhoto  | file       | No       |
-  | experiences        | JSON string| No       |
-  | education          | JSON string| No       |
-  | projects           | JSON string| No       |
-  | certifications     | JSON string| No       |
-  | contactInfo        | JSON string| No       |
+  | title | string | Yes |
+  | summary | string | No |
+  | skills | string[] | Yes |
+  | professionalPhoto | file | No |
+  | experiences | JSON string| No |
+  | education | JSON string| No |
+  | projects | JSON string| No |
+  | certifications | JSON string| No |
+  | contactInfo | JSON string| No |
 - **Validation**: Title min 3 chars, skills array of strings, JSON fields must be valid, photo max 2MB.
 - **Example**:
   ```bash
@@ -702,14 +786,18 @@ POST /resumes
     "success": true,
     "statusCode": 201,
     "message": "Resume created successfully",
-    "data": { /* SafeResume object */ }
+    "data": {
+      /* SafeResume object */
+    }
   }
   ```
 
 #### Update Resume
+
 ```
 PUT /resumes/:id
 ```
+
 - **Access**: Auth (Admin or owner)
 - **Description**: Updates a resume. Replaces photo if provided (old deleted).
 - **Request Body**: Same as Create Resume, all fields optional.
@@ -726,14 +814,18 @@ PUT /resumes/:id
     "success": true,
     "statusCode": 200,
     "message": "Resume updated successfully",
-    "data": { /* Updated SafeResume object */ }
+    "data": {
+      /* Updated SafeResume object */
+    }
   }
   ```
 
 #### Delete Resume
+
 ```
 DELETE /resumes/:id
 ```
+
 - **Access**: Auth (Admin only)
 - **Description**: Deletes a resume and its photo.
 - **Example**:
@@ -752,7 +844,9 @@ DELETE /resumes/:id
   ```
 
 ## Response Format
+
 All API responses follow this structure:
+
 ```json
 {
   "success": boolean,
@@ -763,32 +857,39 @@ All API responses follow this structure:
 ```
 
 ## Validation & Error Handling
+
 - **Input Validation**: Handled at the service level to ensure data integrity.
-- **Role-Based Access**: Enforced via `protectNextAuth` middleware.
+- **Role-Based Access**: Enforced via `checkAuth` middleware.
 - **File Restrictions**: Multer enforces file size (e.g., 2MB for images) and type restrictions.
 - **Error Handling**: Global error handler formats errors for consistent responses.
 
 ## Setup & Installation
+
 ### Prerequisites
+
 - Node.js ≥ 20
 - PostgreSQL
 - Cloudinary account (for file uploads)
 - Optional: Postman or Insomnia for API testing
 
 ### Steps
+
 1. **Clone the Repository**:
+
    ```bash
    git clone https://github.com/Sarwarhridoy4/sarwar-hossain-portfolio.git
    cd sarwar-hossain-portfolio
    ```
 
 2. **Install Dependencies**:
+
    ```bash
    npm install
    ```
 
 3. **Set Up Environment Variables**:
    Create a `.env` file in the root directory with the following:
+
    ```
    DATABASE_URL="postgresql://user:password@localhost:5432/dbname?schema=public"
    NEXTAUTH_SECRET="your_nextauth_secret"
@@ -798,11 +899,13 @@ All API responses follow this structure:
    ```
 
 4. **Generate Prisma Client**:
+
    ```bash
    npm run generate
    ```
 
 5. **Apply Database Migrations**:
+
    ```bash
    npm run migrate:dev
    ```
@@ -813,15 +916,21 @@ All API responses follow this structure:
    ```
 
 ## Running the Application
+
 ### Development
+
 Run the development server with hot reloading:
+
 ```bash
 npm run dev
 ```
+
 - Server runs at: `http://localhost:5000`
 
 ### Production
+
 Build and run the application for production:
+
 ```bash
 # Build TypeScript code
 npm run build
@@ -829,18 +938,22 @@ npm run build
 # Start production server
 npm start
 ```
+
 - Builds to `/dist` folder
 - Runs compiled JavaScript with Node.js
 
 ## API Testing
+
 Use tools like Postman or Insomnia to test endpoints. Ensure the `Cookie` header includes the NextAuth session token for authenticated requests. Example requests are provided above for each endpoint.
 
 ## Notes
+
 - **File Uploads**: Managed via Cloudinary, with automatic deletion of old files on update.
-- **Security**: `protectNextAuth` middleware ensures private routes are secure.
+- **Security**: `checkAuth` middleware ensures private routes are secure.
 - **Admin Privileges**: Only admins can manage users and delete certain resources.
 - **Flexible Data**: Resume JSON fields (experiences, education, etc.) support arbitrary structures.
 - **Production Deployment**: Use a process manager like PM2 for production stability.
 
 ## License
+
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

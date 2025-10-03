@@ -5,6 +5,8 @@ import { sendResponse } from "../../../utils/sendResponse";
 import { AuthServices } from "./auth.service";
 import { uploadBufferToCloudinary } from "../../../config/cloudinary";
 import AppError from "../../../helpers/errorhelper/AppError";
+import { setAuthCookie } from "../../../utils/setCookie";
+import { createNewAccessTokenWithRefreshToken } from "../../../utils/userToken";
 
 // ✅ Create user
 const createUser = catchAsync(async (req: Request, res: Response) => {
@@ -42,17 +44,62 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
 });
 
 // ✅ Login with email + password
-const loginWithEmailAndPassword = catchAsync(
+export const loginWithEmailAndPassword = catchAsync(
   async (req: Request, res: Response) => {
-    const user = await AuthServices.loginWithEmailAndPassword(req.body);
+    // Call service to validate user & get tokens
+    const userWithTokens = await AuthServices.loginWithEmailAndPassword(
+      req.body
+    );
+
+    // Set JWT cookies
+    setAuthCookie(res, {
+      accessToken: userWithTokens.tokens.accessToken,
+      refreshToken: userWithTokens.tokens.refreshToken,
+    });
+
+    // Send response without exposing password
+    const { tokens, ...safeUser } = userWithTokens;
+
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
       message: "Login successful",
-      data: user,
+      data: safeUser,
     });
   }
 );
+
+export const refreshToken = catchAsync(async (req: Request, res: Response) => {
+  //  Get refresh token from cookie or body
+  const refreshToken = req.cookies?.refreshToken || req.body.refreshToken;
+  if (!refreshToken) {
+    res.status(StatusCodes.UNAUTHORIZED).json({
+      success: false,
+      message: "No refresh token provided",
+    });
+    return;
+  }
+
+  // Verify and issue new access token
+  const newAccessToken = await createNewAccessTokenWithRefreshToken(
+    refreshToken
+  );
+
+  // Set httpOnly cookies
+  setAuthCookie(res, {
+    accessToken: newAccessToken /*, refreshToken: newRefreshToken */,
+  });
+
+  // Send response
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: "Access token refreshed",
+    data: {
+      accessToken: newAccessToken,
+      // refreshToken: newRefreshToken
+    },
+  });
+});
 
 // ✅ Auth with Google
 const authWithGoogle = catchAsync(async (req: Request, res: Response) => {
@@ -79,6 +126,7 @@ const authWithGithub = catchAsync(async (req: Request, res: Response) => {
 export const UserControllers = {
   createUser,
   loginWithEmailAndPassword,
+  refreshToken,
   authWithGoogle,
   authWithGithub,
 };
