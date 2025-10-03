@@ -44,6 +44,7 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
 });
 
 // ✅ Login with email + password
+
 export const loginWithEmailAndPassword = catchAsync(
   async (req: Request, res: Response) => {
     // Call service to validate user & get tokens
@@ -51,20 +52,24 @@ export const loginWithEmailAndPassword = catchAsync(
       req.body
     );
 
-    // Set JWT cookies
-    setAuthCookie(res, {
-      accessToken: userWithTokens.tokens.accessToken,
-      refreshToken: userWithTokens.tokens.refreshToken,
-    });
-
-    // Send response without exposing password
     const { tokens, ...safeUser } = userWithTokens;
 
+    // Set JWT cookies (httpOnly)
+    setAuthCookie(res, {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    });
+
+    // ✅ Include tokens in JSON response for frontend/NextAuth
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
       message: "Login successful",
-      data: safeUser,
+      data: {
+        ...safeUser,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      },
     });
   }
 );
