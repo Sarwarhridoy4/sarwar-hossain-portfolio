@@ -2,29 +2,21 @@
 import { Router } from "express";
 import { ProjectController } from "./project.controller";
 import { multerUpload } from "../../../config/multer";
-import { protectNextAuth } from "../../middlewares/nextAuthMiddleware";
 import { UserRole } from "../../../types";
+import { checkAuth } from "../../middlewares/checkAuth";
 
 const router = Router();
 
 // Get all projects
-router.get(
-  "/",
-  protectNextAuth([UserRole.ADMIN]),
-  ProjectController.getAllProjects
-);
+router.get("/", checkAuth(UserRole.ADMIN), ProjectController.getAllProjects);
 
 // Get a project by ID
-router.get(
-  "/:id",
-  protectNextAuth([UserRole.ADMIN]),
-  ProjectController.getProjectById
-);
+router.get("/:id", checkAuth(UserRole.ADMIN), ProjectController.getProjectById);
 
 // Create a new project (Admin only)
 router.post(
   "/",
-  protectNextAuth([UserRole.ADMIN]),
+  checkAuth(UserRole.ADMIN),
   multerUpload.array("images", 5), // allow up to 5 images
   ProjectController.createProject
 );
@@ -32,7 +24,7 @@ router.post(
 // Update a project (Admin only)
 router.put(
   "/:id",
-  protectNextAuth([UserRole.ADMIN]),
+  checkAuth(UserRole.ADMIN),
   multerUpload.array("images", 5),
   ProjectController.updateProject
 );
@@ -40,7 +32,7 @@ router.put(
 // Delete a project (Admin only)
 router.delete(
   "/:id",
-  protectNextAuth([UserRole.ADMIN]),
+  checkAuth(UserRole.ADMIN),
   ProjectController.deleteProject
 );
 

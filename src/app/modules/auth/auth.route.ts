@@ -2,12 +2,14 @@ import { Router } from "express";
 import { UserControllers } from "./auth.controller";
 import { validateRequest } from "../../middlewares/validateRequest";
 import { signupSchema, loginSchema } from "./auth.validator";
+import { multerUpload } from "../../../config/multer";
 
 const router = Router();
 
 // ✅ Signup
 router.post(
   "/signup",
+  multerUpload.single("profilePicture"), // Optional file
   validateRequest(signupSchema),
   UserControllers.createUser
 );
@@ -18,6 +20,9 @@ router.post(
   validateRequest(loginSchema),
   UserControllers.loginWithEmailAndPassword
 );
+
+// ✅ Token refresh
+router.post("/refresh-token", UserControllers.refreshToken);
 
 // ✅ Social login (Google)
 router.post("/google", UserControllers.authWithGoogle);

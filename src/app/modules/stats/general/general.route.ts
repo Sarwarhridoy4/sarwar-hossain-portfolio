@@ -1,14 +1,14 @@
 import { Router } from "express";
-import { protectNextAuth } from "../../../middlewares/nextAuthMiddleware";
 import { UserRole } from "../../../../types";
 import { StatsController } from "./general.controller";
+import { checkAuth } from "../../../middlewares/checkAuth";
 
 const router = Router();
 
 // Only admin should see system-wide stats
 router.get(
   "/general/overview",
-  protectNextAuth([UserRole.ADMIN]),
+  checkAuth(UserRole.ADMIN),
   StatsController.getOverviewStats
 );
 

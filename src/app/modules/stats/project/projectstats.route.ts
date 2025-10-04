@@ -1,13 +1,14 @@
 import { Router } from "express";
-import { protectNextAuth } from "../../../middlewares/nextAuthMiddleware";
+
 import { UserRole } from "../../../../types";
 import { StatsController } from "./projectstats.controller";
+import { checkAuth } from "../../../middlewares/checkAuth";
 
 const router = Router();
 
 router.get(
   "/stats/projects",
-  protectNextAuth([UserRole.ADMIN]),
+  checkAuth(UserRole.ADMIN),
   StatsController.getProjectsStats
 );
 
