@@ -6,28 +6,49 @@ import { multerUpload } from "../../../config/multer";
 
 const router = Router();
 
-// ✅ Signup
+/**
+ * 📝 Signup
+ * - Handles file upload (optional profile picture)
+ * - Validates input with Zod/Joi schema
+ * - Only creates user — no tokens returned
+ */
 router.post(
   "/signup",
-  multerUpload.single("profilePicture"), // Optional file
+  multerUpload.single("profilePicture"),
   validateRequest(signupSchema),
   UserControllers.createUser
 );
 
-// ✅ Login (email + password)
+/**
+ * 🔑 Login (email + password)
+ * - Validates request
+ * - Returns both accessToken + refreshToken
+ * - Sets them as httpOnly cookies
+ */
 router.post(
   "/login",
   validateRequest(loginSchema),
   UserControllers.loginWithEmailAndPassword
 );
 
-// ✅ Token refresh
+/**
+ * ♻️ Refresh token
+ * - Accepts refreshToken from cookie/body
+ * - Returns new accessToken
+ */
 router.post("/refresh-token", UserControllers.refreshToken);
 
-// ✅ Social login (Google)
+/**
+ * 🌐 Google social login
+ * - Returns accessToken + refreshToken
+ * - Also sets cookies
+ */
 router.post("/google", UserControllers.authWithGoogle);
 
-// ✅ Social login (GitHub)
+/**
+ * 🐙 GitHub social login
+ * - Same as Google login
+ */
 router.post("/github", UserControllers.authWithGithub);
 
 export const AuthRoutes = router;
