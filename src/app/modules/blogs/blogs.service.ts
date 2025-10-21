@@ -27,13 +27,19 @@ const getAllBlogs = async (): Promise<SafeBlog[]> => {
 };
 
 const getBlogById = async (id: string): Promise<SafeBlog> => {
+  const today = new Date();
+  const dateOnly = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
+  );
+
+  // Perform blog fetch + total views increment + daily view count tracking in the same transaction
   const [updatedBlog] = await prisma.$transaction([
     prisma.blog.update({
       where: { id },
       data: {
-        views: {
-          increment: 1, // safely increment views
-        },
+        views: { increment: 1 },
       },
       select: {
         id: true,
@@ -47,6 +53,11 @@ const getBlogById = async (id: string): Promise<SafeBlog> => {
         createdAt: true,
         updatedAt: true,
       },
+    }),
+    prisma.blogView.upsert({
+      where: { blogId_date: { blogId: id, date: dateOnly } },
+      update: { count: { increment: 1 } },
+      create: { blogId: id, date: dateOnly, count: 1 },
     }),
   ]);
 
@@ -147,32 +158,10 @@ const deleteBlog = async (id: string) => {
   return { message: "Blog deleted successfully" };
 };
 
-const incrementBlogView = async (blogId: string) => {
-  const today = new Date();
-  const dateOnly = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate()
-  );
-
-  return await prisma.$transaction([
-    prisma.blog.update({
-      where: { id: blogId },
-      data: { views: { increment: 1 } },
-    }),
-    prisma.blogView.upsert({
-      where: { blogId_date: { blogId, date: dateOnly } },
-      update: { count: { increment: 1 } },
-      create: { blogId, date: dateOnly, count: 1 },
-    }),
-  ]);
-};
-
 export const BlogService = {
   getAllBlogs,
   getBlogById,
   createBlog,
   updateBlog,
   deleteBlog,
-  incrementBlogView,
 };
