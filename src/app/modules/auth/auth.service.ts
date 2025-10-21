@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Role } from "@prisma/client";
 import bcryptjs from "bcryptjs";
 import { env } from "../../../config/env";
 import AppError from "../../../helpers/errorhelper/AppError";
@@ -7,15 +7,88 @@ import { createUserTokens } from "../../../utils/userToken";
 
 const prisma = new PrismaClient();
 
-/**
- * Signup a new user
- */
-const signupUser = async (payload: {
+// ------------------
+// Types
+// ------------------
+interface SignupPayload {
   name: string;
   email: string;
   password: string;
   profilePicture?: string | null;
-}) => {
+}
+
+interface LoginPayload {
+  email: string;
+  password: string;
+}
+
+interface OAuthAccount {
+  provider: "google" | "github";
+  type: "oauth";
+  providerAccountId: string;
+  access_token: string;
+  expires_at?: number;
+  refresh_token?: string;
+  refresh_token_expires_in?: number;
+  token_type?: string;
+  scope?: string;
+  id_token?: string; // Google
+}
+
+interface OAuthProfileGoogle {
+  sub: string;
+  email: string;
+  email_verified: boolean;
+  name: string;
+  picture?: string;
+  given_name?: string;
+  family_name?: string;
+}
+
+interface OAuthProfileGitHub {
+  id: number;
+  login: string;
+  avatar_url?: string;
+  name?: string;
+  email?: string;
+  [key: string]: any; // allow extra fields
+}
+
+// Combined OAuth payload type
+interface OAuthPayload {
+  account: OAuthAccount;
+  profile: OAuthProfileGoogle | OAuthProfileGitHub;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    image?: string;
+  };
+}
+
+// ------------------
+// Return Type
+// ------------------
+interface UserWithTokens {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  profilePicture?: string | null;
+  createdAt: Date;
+  tokens: {
+    accessToken: string;
+    refreshToken: string;
+  };
+}
+
+// ------------------
+// Services
+// ------------------
+/**
+ * 📝 Signup — only creates user (no tokens)
+ */
+const signupUser = async (payload: SignupPayload) => {
   const existingUser = await prisma.user.findUnique({
     where: { email: payload.email },
   });
@@ -49,22 +122,16 @@ const signupUser = async (payload: {
 };
 
 /**
- * Login with email and password
+ * 🔑 Login (email + password)
  */
-interface LoginPayload {
-  email: string;
-  password: string;
-}
-
-export const loginWithEmailAndPassword = async (payload: LoginPayload) => {
-  // Find user by email
+const loginWithEmailAndPassword = async (
+  payload: LoginPayload
+): Promise<UserWithTokens> => {
   const user = await prisma.user.findUnique({
     where: { email: payload.email },
   });
-
   if (!user) throw new AppError(StatusCodes.NOT_FOUND, "User not found");
 
-  // Validate password
   const isPasswordValid = await bcryptjs.compare(
     payload.password,
     user.password
@@ -72,55 +139,69 @@ export const loginWithEmailAndPassword = async (payload: LoginPayload) => {
   if (!isPasswordValid)
     throw new AppError(StatusCodes.UNAUTHORIZED, "Password is incorrect!");
 
-  // Generate JWT tokens
   const tokens = createUserTokens({
-    id: user.id, // use Prisma id
+    id: user.id,
     email: user.email,
     role: user.role,
   });
 
-  // Return safe user data along with tokens
   const { password, ...safeUser } = user;
   return { ...safeUser, tokens };
 };
 
 /**
- * Auth with OAuth provider (Google or GitHub)
+ * 🌐 OAuth login (Google / GitHub)
  */
-const authWithProvider = async (payload: {
-  name: string;
-  email: string;
-  profilePicture?: string;
-  provider: "GOOGLE" | "GITHUB";
-}) => {
-  let user = await prisma.user.findUnique({ where: { email: payload.email } });
+const authWithProvider = async (
+  payload: OAuthPayload
+): Promise<UserWithTokens> => {
+  const email = payload.profile.email || payload.user.email;
+  if (!email) throw new AppError(400, "Email is required for OAuth login");
+
+  let user = await prisma.user.findUnique({ where: { email } });
+
+  const profilePicture =
+    payload.profile.picture ||
+    (payload.profile as OAuthProfileGitHub).avatar_url ||
+    null;
 
   if (!user) {
     user = await prisma.user.create({
       data: {
-        name: payload.name,
-        email: payload.email,
-        password: "", // OAuth users don’t need a password
+        name: payload.user.name,
+        email,
+        password: "", // OAuth users don’t need passwords
         role: "USER",
-        profilePicture: payload.profilePicture || null,
-        provider: payload.provider,
+        profilePicture,
+        provider: payload.account.provider.toUpperCase() as "GOOGLE" | "GITHUB",
       },
     });
   } else {
-    // Update profile picture if changed
-    if (
-      payload.profilePicture &&
-      payload.profilePicture !== user.profilePicture
-    ) {
+    // Update provider + profilePicture if changed
+    const updates: Partial<typeof user> = {};
+    if (profilePicture && profilePicture !== user.profilePicture)
+      updates.profilePicture = profilePicture;
+    if (user.provider !== payload.account.provider.toUpperCase())
+      updates.provider = payload.account.provider.toUpperCase() as
+        | "GOOGLE"
+        | "GITHUB";
+
+    if (Object.keys(updates).length > 0) {
       user = await prisma.user.update({
         where: { id: user.id },
-        data: { profilePicture: payload.profilePicture },
+        data: updates,
       });
     }
   }
 
+  const tokens = createUserTokens({
+    id: user.id,
+    email: user.email,
+    role: user.role,
+  });
+
   const { password, ...safeUser } = user;
-  return safeUser;
+  return { ...safeUser, tokens };
 };
 
 export const AuthServices = {

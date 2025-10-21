@@ -20,6 +20,9 @@ export const checkAuth =
         accessToken,
         env.JWT_SECRET_KEY
       ) as JwtPayload & { role: string; email: string };
+      if (!verifiedToken) {
+        throw new AppError(StatusCodes.UNAUTHORIZED, "Invalid token");
+      }
 
       // ✅ Prisma query
       const user = await prisma.user.findUnique({

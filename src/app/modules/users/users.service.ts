@@ -56,6 +56,7 @@ const createUser = async (
   const existing = await prisma.user.findUnique({
     where: { email: payload.email },
   });
+  
   if (existing) throw new AppError(400, "User already exists");
 
   const hashedPassword = await bcryptjs.hash(

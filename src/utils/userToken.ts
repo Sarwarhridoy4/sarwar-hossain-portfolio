@@ -6,7 +6,7 @@ import AppError from "../helpers/errorhelper/AppError";
 import { prisma } from "../config/db";
 
 /**
- * Generate access + refresh tokens for a user
+ * 🔐 Generate access + refresh tokens for a user
  */
 export const createUserTokens = (user: {
   id: string;
@@ -19,59 +19,64 @@ export const createUserTokens = (user: {
     role: user.role,
   };
 
+  // Access token (short lifespan)
   const accessToken = generateToken(
     jwtPayload,
     env.JWT_SECRET_KEY,
     env.JWT_EXPIRES_IN
   );
 
+  // Refresh token (long lifespan)
   const refreshToken = generateToken(
     jwtPayload,
     env.JWT_REFRESH_SECRET,
     env.JWT_REFRESH_EXPIRES
   );
 
-  return { accessToken, refreshToken };
+  return {
+    accessToken,
+    refreshToken,
+    expiresIn: env.JWT_EXPIRES_IN,
+  };
 };
 
 /**
- * Refresh token logic → issue a new access token
+ * ♻️ Generate new access token using refresh token
  */
 export const createNewAccessTokenWithRefreshToken = async (
   refreshToken: string
 ) => {
-  let verifiedRefreshToken: AuthJwtPayload;
-
   try {
-    verifiedRefreshToken = verifyToken(
+    // Verify refresh token validity
+    const decoded = verifyToken(
       refreshToken,
       env.JWT_REFRESH_SECRET
     ) as AuthJwtPayload;
+
+    // Check if user still exists
+    const user = await prisma.user.findUnique({
+      where: { email: decoded.email },
+    });
+
+    if (!user)
+      throw new AppError(StatusCodes.NOT_FOUND, "User no longer exists");
+
+    const newAccessToken = generateToken(
+      {
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+      },
+      env.JWT_SECRET_KEY,
+      env.JWT_EXPIRES_IN
+    );
+
+    return {
+      accessToken: newAccessToken,
+      expiresIn: env.JWT_EXPIRES_IN,
+    };
   } catch (err) {
-    console.error("❌ Invalid refresh token:", err);
-    throw new AppError(StatusCodes.UNAUTHORIZED, "Invalid refresh token");
+    console.error("❌ Refresh token error:", err);
+    throw new AppError(StatusCodes.UNAUTHORIZED, "Invalid or expired token");
   }
-
-  // ✅ Find user in Prisma
-  const user = await prisma.user.findUnique({
-    where: { email: verifiedRefreshToken.email },
-  });
-
-  if (!user) {
-    throw new AppError(StatusCodes.NOT_FOUND, "User does not exist");
-  }
-
-  const jwtPayload: AuthJwtPayload = {
-    userId: user.id,
-    email: user.email,
-    role: user.role,
-  };
-
-  const newAccessToken = generateToken(
-    jwtPayload,
-    env.JWT_SECRET_KEY,
-    env.JWT_EXPIRES_IN
-  );
-
-  return newAccessToken;
 };
