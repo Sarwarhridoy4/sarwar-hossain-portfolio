@@ -72,7 +72,7 @@ const createBlog = async (
   const blog = await prisma.blog.create({
     data: {
       ...payload,
-      tag: JSON.stringify(payload.tag || []), // store array as JSON string
+      tags: Array.isArray(payload.tags) ? payload.tags : [payload.tags],
       thumbnail: thumbnailUrl,
     },
     select: {
