@@ -7,6 +7,8 @@ import { router } from "./routes";
 import { globalErrorHandler } from "./app/middlewares/globalerrorHandler";
 import notFound from "./app/middlewares/notFound";
 import { env } from "./config/env";
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./config/swagger";
 
 const app: Application = express();
 
@@ -23,6 +25,8 @@ app.use(cookieParser());
 
 // Routes
 app.use("/api/v1", router);
+app.get("/api-docs.json", (_req, res) => res.json(swaggerSpec));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Default route for testing
 app.get("/", (_req: Request, res: Response) => {
