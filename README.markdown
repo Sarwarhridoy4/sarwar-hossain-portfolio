@@ -1086,12 +1086,34 @@ All API responses follow this structure:
 3. **Set Up Environment Variables**:
    Create a `.env` or `.env.local` file in the root directory with the following:
 
-   ```
-   DATABASE_URL="postgresql://user:password@localhost:5432/dbname?schema=public"
+   ```env
+   # App
+   PORT=5000
+   NODE_ENV=development
+
+   # Auth / JWT
+   JWT_ACCESS_SECRET="your_jwt_access_secret"
+   JWT_ACCESS_EXPIRES="1d"
+   JWT_REFRESH_SECRET="your_jwt_refresh_secret"
+   JWT_REFRESH_EXPIRES="30d"
    NEXTAUTH_SECRET="your_nextauth_secret"
+   BYCRYPT_SALT_ROUNDS=10
+
+   # Database (PostgreSQL)
+   DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/portfolio_db?schema=public"
+
+   # Cloudinary
    CLOUDINARY_CLOUD_NAME="your_cloud_name"
-   CLOUDINARY_API_KEY="your_api_key"
-   CLOUDINARY_API_SECRET="your_api_secret"
+   CLOUDINARY_API_KEY="your_cloudinary_api_key"
+   CLOUDINARY_API_SECRET="your_cloudinary_api_secret"
+
+   # Admin seed (optional)
+   ADMIN_EMAIL="admin@example.com"
+   ADMIN_PASSWORD="your_admin_password"
+
+   # Frontend
+   FRONTEND_URL="http://localhost:3000"
+   FRONTEND_URL_PRODUCTION="https://your-frontend-domain.com"
    ```
 
 4. **Generate Prisma Client**:
