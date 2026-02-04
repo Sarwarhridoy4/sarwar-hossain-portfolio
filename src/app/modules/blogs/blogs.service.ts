@@ -107,12 +107,20 @@ const getBlogById = async (
   }
 
   // Perform blog fetch + total views increment + daily view count tracking in the same transaction
-  const [updatedBlog] = await prisma.$transaction([
-    prisma.blog.update({
+  const updatedBlog = await prisma.$transaction(async (tx) => {
+    const updateResult = await tx.blog.updateMany({
       where,
       data: {
         views: { increment: 1 },
       },
+    });
+
+    if (updateResult.count === 0) {
+      throw new AppError(404, "Blog not found");
+    }
+
+    const blog = await tx.blog.findFirst({
+      where,
       select: {
         id: true,
         title: true,
@@ -135,15 +143,20 @@ const getBlogById = async (
         createdAt: true,
         updatedAt: true,
       },
-    }),
-    prisma.blogView.upsert({
+    });
+
+    if (!blog) {
+      throw new AppError(404, "Blog not found");
+    }
+
+    await tx.blogView.upsert({
       where: { blogId_date: { blogId: id, date: dateOnly } },
       update: { count: { increment: 1 } },
       create: { blogId: id, date: dateOnly, count: 1 },
-    }),
-  ]);
+    });
 
-  if (!updatedBlog) throw new AppError(404, "Blog not found");
+    return blog;
+  });
 
   return updatedBlog;
 };
