@@ -1,5 +1,5 @@
 // services/resume.service.ts
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../../config/db";
 import { SafeResume } from "../../../types";
 import AppError from "../../../helpers/errorhelper/AppError";
 import {
@@ -7,10 +7,25 @@ import {
   uploadBufferToCloudinary,
 } from "../../../config/cloudinary";
 
-const prisma = new PrismaClient();
+const parseBoolean = (value: unknown) => {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") return value.toLowerCase() === "true";
+  return undefined;
+};
 
-const getAllResumes = async (): Promise<SafeResume[]> => {
-  const resumes = await prisma.resume.findMany();
+const getAllResumes = async (options?: {
+  includeDeleted?: boolean;
+  publicOnly?: boolean;
+}): Promise<SafeResume[]> => {
+  const where: any = {};
+  if (!options?.includeDeleted) {
+    where.deletedAt = null;
+  }
+  if (options?.publicOnly) {
+    where.isPublic = true;
+  }
+
+  const resumes = await prisma.resume.findMany({ where });
   return resumes.map((resume) => ({
     ...resume,
     experiences: resume.experiences as Record<string, any>[] | null,
@@ -22,11 +37,19 @@ const getAllResumes = async (): Promise<SafeResume[]> => {
 };
 
 // services/resume.service.ts
-const getResumesByUser = async (email: string): Promise<SafeResume[]> => {
+const getResumesByUser = async (
+  email: string,
+  options?: { includeDeleted?: boolean }
+): Promise<SafeResume[]> => {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) throw new AppError(404, "User not found");
 
-  const resumes = await prisma.resume.findMany({ where: { userId: user.id } });
+  const resumes = await prisma.resume.findMany({
+    where: {
+      userId: user.id,
+      ...(options?.includeDeleted ? {} : { deletedAt: null }),
+    },
+  });
 
   return resumes.map((r) => ({
     ...r,
@@ -38,8 +61,17 @@ const getResumesByUser = async (email: string): Promise<SafeResume[]> => {
   }));
 };
 
-const getResumeById = async (id: string): Promise<SafeResume> => {
-  const resume = await prisma.resume.findUnique({ where: { id } });
+const getResumeById = async (
+  id: string,
+  options?: { includeDeleted?: boolean; publicOnly?: boolean }
+): Promise<SafeResume> => {
+  const resume = await prisma.resume.findFirst({
+    where: {
+      id,
+      ...(options?.includeDeleted ? {} : { deletedAt: null }),
+      ...(options?.publicOnly ? { isPublic: true } : {}),
+    },
+  });
   if (!resume) throw new AppError(404, "Resume not found");
   return {
     ...resume,
@@ -62,8 +94,10 @@ const createResume = async (
     certifications?: any;
     contactInfo?: any;
     userId: string;
+    isPublic?: boolean;
   },
-  file?: Express.Multer.File
+  file?: Express.Multer.File,
+  actorId?: string
 ): Promise<SafeResume> => {
   let uploadedPhoto: string | undefined;
 
@@ -79,7 +113,13 @@ const createResume = async (
   const createdResume = await prisma.resume.create({
     data: {
       ...payload,
+      isPublic:
+        typeof payload.isPublic === "boolean"
+          ? payload.isPublic
+          : parseBoolean(payload.isPublic),
       professionalPhoto: uploadedPhoto,
+      createdById: actorId,
+      updatedById: actorId,
     },
   });
 
@@ -106,10 +146,14 @@ const updateResume = async (
     projects?: any;
     certifications?: any;
     contactInfo?: any;
+    isPublic?: boolean;
   }>,
-  file?: Express.Multer.File
+  file?: Express.Multer.File,
+  actorId?: string
 ): Promise<SafeResume> => {
-  const existing = await prisma.resume.findUnique({ where: { id } });
+  const existing = await prisma.resume.findFirst({
+    where: { id, deletedAt: null },
+  });
   if (!existing) throw new AppError(404, "Resume not found");
 
   let updatedPhoto = existing.professionalPhoto;
@@ -132,7 +176,16 @@ const updateResume = async (
     where: { id },
     data: {
       ...payload,
+      ...(Object.prototype.hasOwnProperty.call(payload, "isPublic")
+        ? {
+            isPublic:
+              typeof payload.isPublic === "boolean"
+                ? payload.isPublic
+                : parseBoolean(payload.isPublic),
+          }
+        : {}),
       professionalPhoto: updatedPhoto,
+      updatedById: actorId,
     },
   });
 
@@ -149,7 +202,9 @@ const updateResume = async (
 };
 
 const deleteResume = async (id: string) => {
-  const existing = await prisma.resume.findUnique({ where: { id } });
+  const existing = await prisma.resume.findFirst({
+    where: { id, deletedAt: null },
+  });
   if (!existing) throw new AppError(404, "Resume not found");
 
   // delete professional photo if exists
@@ -157,7 +212,10 @@ const deleteResume = async (id: string) => {
     await deleteImageFromCloudinary(existing.professionalPhoto);
   }
 
-  await prisma.resume.delete({ where: { id } });
+  await prisma.resume.update({
+    where: { id },
+    data: { deletedAt: new Date() },
+  });
   return { message: "Resume deleted successfully" };
 };
 

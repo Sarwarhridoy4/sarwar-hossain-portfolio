@@ -7,7 +7,7 @@ const router = Router();
 
 // Only admin should see system-wide stats
 router.get(
-  "/general/overview",
+  "/overview",
   checkAuth(UserRole.ADMIN),
   StatsController.getOverviewStats
 );

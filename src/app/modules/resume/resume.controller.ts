@@ -17,6 +17,19 @@ const getAllResumes = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// Public resumes
+const getPublicResumes = catchAsync(async (_req: Request, res: Response) => {
+  const resumes: SafeResume[] = await ResumeService.getAllResumes({
+    publicOnly: true,
+  });
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "Public resumes fetched successfully",
+    data: resumes,
+  });
+});
+
 // Get all resumes for the logged-in user
 const getUserResumes = catchAsync(async (req: Request, res: Response) => {
   if (!req.user?.email) throw new Error("Unauthorized");
@@ -43,11 +56,24 @@ const getResume = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getPublicResume = catchAsync(async (req: Request, res: Response) => {
+  const resume: SafeResume = await ResumeService.getResumeById(req.params.id, {
+    publicOnly: true,
+  });
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "Public resume fetched successfully",
+    data: resume,
+  });
+});
+
 // Create a new resume
 const createResume = catchAsync(async (req: Request, res: Response) => {
   const resume: SafeResume = await ResumeService.createResume(
     req.body,
-    req.file
+    req.file,
+    req.user?.id
   );
   sendResponse(res, {
     success: true,
@@ -62,7 +88,8 @@ const updateResume = catchAsync(async (req: Request, res: Response) => {
   const resume: SafeResume = await ResumeService.updateResume(
     req.params.id,
     req.body,
-    req.file
+    req.file,
+    req.user?.id
   );
   sendResponse(res, {
     success: true,
@@ -85,8 +112,10 @@ const deleteResume = catchAsync(async (req: Request, res: Response) => {
 
 export const ResumeControllers = {
   getAllResumes,
+  getPublicResumes,
   getUserResumes,
   getResume,
+  getPublicResume,
   createResume,
   updateResume,
   deleteResume,

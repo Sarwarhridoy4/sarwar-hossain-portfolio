@@ -24,8 +24,18 @@ export type SafeBlog = {
   tags: string[]; // array of strings
   content: string;
   thumbnail: string; // Cloudinary URL
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  ogImage?: string | null;
+  featured: boolean;
+  priority?: number | null;
+  published: boolean;
+  publishedAt?: Date | null;
   authorId: string;
   views: number;
+  createdById?: string | null;
+  updatedById?: string | null;
+  deletedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -40,7 +50,17 @@ export type SafeProject = {
   repoUrl?: string | null;
   techStack: string[];
   images: string[];
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  ogImage?: string | null;
+  featured: boolean;
+  priority?: number | null;
+  published: boolean;
+  publishedAt?: Date | null;
   authorId: string;
+  createdById?: string | null;
+  updatedById?: string | null;
+  deletedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -50,6 +70,7 @@ export type SafeResume = {
   title: string;
   summary: string | null;
   professionalPhoto: string | null;
+  isPublic: boolean;
 
   experiences: Record<string, any>[] | null; // array of objects for experiences
   education: Record<string, any>[] | null; // array of objects for education
@@ -59,6 +80,9 @@ export type SafeResume = {
   contactInfo: Record<string, any> | null; // object with contact info
 
   userId: string;
+  createdById?: string | null;
+  updatedById?: string | null;
+  deletedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 };

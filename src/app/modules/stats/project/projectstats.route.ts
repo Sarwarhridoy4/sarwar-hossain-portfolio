@@ -6,10 +6,6 @@ import { checkAuth } from "../../../middlewares/checkAuth";
 
 const router = Router();
 
-router.get(
-  "/stats/projects",
-  checkAuth(UserRole.ADMIN),
-  StatsController.getProjectsStats
-);
+router.get("/", checkAuth(UserRole.ADMIN), StatsController.getProjectsStats);
 
 export const ProjectStatsRoutes = router;

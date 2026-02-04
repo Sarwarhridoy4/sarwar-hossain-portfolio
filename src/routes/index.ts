@@ -10,6 +10,7 @@ import { TrafficStatsRoutes } from "../app/modules/stats/traffic/trafficstats.ro
 import { BlogStatsRoutes } from "../app/modules/stats/blog/blogstats.routes";
 import { ProjectStatsRoutes } from "../app/modules/stats/project/projectstats.route";
 import { ResumeStatsRoutes } from "../app/modules/stats/resume/resumestats.route";
+import { HealthRoutes } from "./health";
 
 export const router = Router();
 
@@ -58,6 +59,10 @@ const moduleRoutes = [
   {
     path: "/stats/resume",
     route: ResumeStatsRoutes,
+  },
+  {
+    path: "/health",
+    route: HealthRoutes,
   },
 ];
 

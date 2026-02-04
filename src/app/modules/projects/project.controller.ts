@@ -2,8 +2,35 @@ import { Request, Response } from "express";
 import { catchAsync } from "../../../utils/catchAsync";
 import { ProjectService } from "./project.service";
 
+const parseMaybeJsonArray = (value: unknown) => {
+  if (typeof value !== "string") return value;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+};
+
 const getAllProjects = catchAsync(async (req: Request, res: Response) => {
-  const projects = await ProjectService.getAllProjects();
+  const isAdmin = req.user?.role === "ADMIN";
+  const includeDrafts = isAdmin
+    ? req.query.includeDrafts !== "false"
+    : false;
+  const includeDeleted = isAdmin && req.query.includeDeleted === "true";
+
+  const projects = await ProjectService.getAllProjects({
+    q: req.query.q as string | undefined,
+    featured: req.query.featured
+      ? req.query.featured === "true"
+      : undefined,
+    published: req.query.published
+      ? req.query.published === "true"
+      : undefined,
+    includeDrafts,
+    includeDeleted,
+    page: req.query.page ? Number(req.query.page) : undefined,
+    limit: req.query.limit ? Number(req.query.limit) : undefined,
+  });
   res.status(200).json({
     success: true,
     message: "Projects fetched successfully",
@@ -13,7 +40,11 @@ const getAllProjects = catchAsync(async (req: Request, res: Response) => {
 
 const getProjectById = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const project = await ProjectService.getProjectById(id);
+  const isAdmin = req.user?.role === "ADMIN";
+  const project = await ProjectService.getProjectById(id, {
+    includeDrafts: isAdmin ? req.query.includeDrafts !== "false" : false,
+    includeDeleted: isAdmin && req.query.includeDeleted === "true",
+  });
   res.status(200).json({
     success: true,
     message: "Project fetched successfully",
@@ -31,10 +62,15 @@ const createProject = catchAsync(async (req: Request, res: Response) => {
     repoUrl,
     techStack,
     authorId,
+    seoTitle,
+    seoDescription,
+    ogImage,
+    featured,
+    priority,
+    published,
   } = req.body;
 
-  const parsedTechStack =
-    typeof techStack === "string" ? JSON.parse(techStack) : techStack;
+  const parsedTechStack = parseMaybeJsonArray(techStack);
 
   const project = await ProjectService.createProject(
     {
@@ -46,8 +82,15 @@ const createProject = catchAsync(async (req: Request, res: Response) => {
       repoUrl,
       techStack: parsedTechStack,
       authorId,
+      seoTitle,
+      seoDescription,
+      ogImage,
+      featured,
+      priority,
+      published,
     },
-    req.files as Express.Multer.File[]
+    req.files as Express.Multer.File[],
+    req.user?.id
   );
 
   res.status(201).json({
@@ -59,11 +102,23 @@ const createProject = catchAsync(async (req: Request, res: Response) => {
 
 const updateProject = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { title, slug, description, techStack, videoUrl, liveUrl, repoUrl } =
-    req.body;
+  const {
+    title,
+    slug,
+    description,
+    techStack,
+    videoUrl,
+    liveUrl,
+    repoUrl,
+    seoTitle,
+    seoDescription,
+    ogImage,
+    featured,
+    priority,
+    published,
+  } = req.body;
 
-  const parsedTechStack =
-    typeof techStack === "string" ? JSON.parse(techStack) : techStack;
+  const parsedTechStack = parseMaybeJsonArray(techStack);
 
   const project = await ProjectService.updateProject(
     id,
@@ -75,8 +130,15 @@ const updateProject = catchAsync(async (req: Request, res: Response) => {
       repoUrl,
       liveUrl,
       techStack: parsedTechStack,
+      seoTitle,
+      seoDescription,
+      ogImage,
+      featured,
+      priority,
+      published,
     },
-    req.files as Express.Multer.File[]
+    req.files as Express.Multer.File[],
+    req.user?.id
   );
 
   res.status(200).json({

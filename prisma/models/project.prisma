@@ -1,0 +1,27 @@
+model Project {
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  description String
+  techStack   String[] // Array of technologies used
+  images      String[] // Cloudinary URLs of screenshots
+  seoTitle    String?
+  seoDescription String?
+  ogImage     String?
+  featured    Boolean  @default(false)
+  priority    Int?
+  published   Boolean  @default(true)
+  publishedAt DateTime?
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  createdById String?
+  updatedById String?
+  createdBy User? @relation("ProjectCreatedBy", fields: [createdById], references: [id])
+  updatedBy User? @relation("ProjectUpdatedBy", fields: [updatedById], references: [id])
+  videoUrl    String?  // Optional demo video URL
+  liveUrl     String?  // Optional live project URL
+  repoUrl     String?  // Optional repository URL
+  deletedAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

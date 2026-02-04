@@ -4,20 +4,38 @@ import { ProjectController } from "./project.controller";
 import { multerUpload } from "../../../config/multer";
 import { UserRole } from "../../../types";
 import { checkAuth } from "../../middlewares/checkAuth";
+import { validateRequest } from "../../middlewares/validateRequest";
+import { createProjectSchema, updateProjectSchema } from "./project.validation";
+import { rateLimit } from "../../middlewares/rateLimit";
 
 const router = Router();
 
-// Get all projects
-router.get("/", checkAuth(UserRole.ADMIN), ProjectController.getAllProjects);
+// Admin routes
+router.get("/admin", checkAuth(UserRole.ADMIN), ProjectController.getAllProjects);
+router.get(
+  "/admin/:id",
+  checkAuth(UserRole.ADMIN),
+  ProjectController.getProjectById
+);
 
-// Get a project by ID
-router.get("/:id", checkAuth(UserRole.ADMIN), ProjectController.getProjectById);
+// Public routes
+router.get(
+  "/",
+  rateLimit({ windowMs: 60_000, max: 60 }),
+  ProjectController.getAllProjects
+);
+router.get(
+  "/:id",
+  rateLimit({ windowMs: 60_000, max: 60 }),
+  ProjectController.getProjectById
+);
 
 // Create a new project (Admin only)
 router.post(
   "/",
   checkAuth(UserRole.ADMIN),
   multerUpload.array("images", 5), // allow up to 5 images
+  validateRequest(createProjectSchema),
   ProjectController.createProject
 );
 
@@ -26,6 +44,7 @@ router.put(
   "/:id",
   checkAuth(UserRole.ADMIN),
   multerUpload.array("images", 5),
+  validateRequest(updateProjectSchema),
   ProjectController.updateProject
 );
 

@@ -9,29 +9,35 @@ A robust backend API for managing a portfolio application, built with modern tec
 - [Base URLs](#base-urls)
 - [Authentication](#authentication)
 - [API Endpoints](#api-endpoints)
+  - [Endpoint Summary](#endpoint-summary)
   - [Auth API](#auth-api)
   - [Users API](#users-api)
   - [Blogs API](#blogs-api)
   - [Projects API](#projects-api)
   - [Resume API](#resume-api)
+  - [Stats API](#stats-api)
+  - [Health API](#health-api)
 - [Response Format](#response-format)
 - [Validation & Error Handling](#validation--error-handling)
 - [Setup & Installation](#setup--installation)
 - [Running the Application](#running-the-application)
 - [API Testing](#api-testing)
+- [System Flowchart](#system-flowchart)
 - [Notes](#notes)
 - [License](#license)
 
 ## Overview
 
-This project is the backend for Sarwar Hossain's portfolio, providing RESTful API endpoints to manage users, blogs, projects, and resumes. It uses NextAuth for authentication, Prisma for database operations, and Cloudinary for file storage. The API enforces role-based access control, with `ADMIN` and `USER` roles, and supports file uploads for profile pictures, blog thumbnails, project images, and resume photos.
+This project is the backend for Sarwar Hossain's portfolio, providing RESTful API endpoints to manage users, blogs, projects, and resumes. It uses NextAuth for authentication, Prisma 7 for database operations, and Cloudinary for file storage. The API enforces role-based access control, with `ADMIN` and `USER` roles, and supports file uploads for profile pictures, blog thumbnails, project images, and resume photos.
 
 ## Tech Stack
 
+- **Bun**: Package manager/runtime for dev and scripts
 - **Node.js**: JavaScript runtime for server-side development
 - **Express**: Web framework for building RESTful APIs
 - **TypeScript**: Static typing for enhanced code reliability
-- **Prisma**: ORM for PostgreSQL database interactions
+- **Prisma 7**: ORM for PostgreSQL database interactions
+- **@prisma/adapter-pg**: PostgreSQL driver adapter for Prisma 7
 - **PostgreSQL**: Relational database for data storage
 - **NextAuth**: Authentication library for secure user sessions
 - **Cloudinary**: Cloud-based file storage for images
@@ -55,6 +61,110 @@ Cookie: next-auth.session-token=<JWT_COOKIE>
   - `USER`: Limited access to their own resources (e.g., creating/updating their own resumes).
 
 ## API Endpoints
+
+### Endpoint Summary
+
+| Category | Access | Method | Endpoint |
+|---|---|---|---|
+| Auth | Public | `POST` | `/auth/signup` |
+| Auth | Public | `POST` | `/auth/login` |
+| Auth | Public | `POST` | `/auth/refresh-token` |
+| Auth | Public | `POST` | `/auth/google` |
+| Auth | Public | `POST` | `/auth/github` |
+| Users | Admin | `GET` | `/users` |
+| Users | Admin | `GET` | `/users/:id` |
+| Users | Admin | `POST` | `/users` |
+| Users | Admin | `PUT` | `/users/:id` |
+| Users | Admin | `DELETE` | `/users/:id` |
+| Blogs | Public | `GET` | `/blogs` |
+| Blogs | Public | `GET` | `/blogs/:id` |
+| Blogs | Admin | `GET` | `/blogs/admin` |
+| Blogs | Admin | `GET` | `/blogs/admin/:id` |
+| Blogs | Admin | `POST` | `/blogs` |
+| Blogs | Admin | `PUT` | `/blogs/:id` |
+| Blogs | Admin | `DELETE` | `/blogs/:id` |
+| Projects | Public | `GET` | `/projects` |
+| Projects | Public | `GET` | `/projects/:id` |
+| Projects | Admin | `GET` | `/projects/admin` |
+| Projects | Admin | `GET` | `/projects/admin/:id` |
+| Projects | Admin | `POST` | `/projects` |
+| Projects | Admin | `PUT` | `/projects/:id` |
+| Projects | Admin | `DELETE` | `/projects/:id` |
+| Resumes | Public | `GET` | `/resumes/public` |
+| Resumes | Public | `GET` | `/resumes/public/:id` |
+| Resumes | User | `GET` | `/resumes/user` |
+| Resumes | Admin | `GET` | `/resumes` |
+| Resumes | Admin | `GET` | `/resumes/:id` |
+| Resumes | Admin | `POST` | `/resumes` |
+| Resumes | Admin | `PUT` | `/resumes/:id` |
+| Resumes | Admin | `DELETE` | `/resumes/:id` |
+| Stats | Admin | `GET` | `/stats/general/overview` |
+| Stats | Admin | `GET` | `/stats/user` |
+| Stats | Admin | `GET` | `/stats/blog` |
+| Stats | Admin | `GET` | `/stats/project` |
+| Stats | Admin | `GET` | `/stats/traffic` |
+| Stats | Admin | `GET` | `/stats/resume` |
+| Health | Public | `GET` | `/health` |
+
+**Auth**
+- `POST /auth/signup`
+- `POST /auth/login`
+- `POST /auth/refresh-token`
+- `POST /auth/google`
+- `POST /auth/github`
+
+**Users (Admin only)**
+- `GET /users`
+- `GET /users/:id`
+- `POST /users`
+- `PUT /users/:id`
+- `DELETE /users/:id`
+
+**Blogs**
+- Public:
+  - `GET /blogs`
+  - `GET /blogs/:id`
+- Admin:
+  - `GET /blogs/admin`
+  - `GET /blogs/admin/:id`
+  - `POST /blogs`
+  - `PUT /blogs/:id`
+  - `DELETE /blogs/:id`
+
+**Projects**
+- Public:
+  - `GET /projects`
+  - `GET /projects/:id`
+- Admin:
+  - `GET /projects/admin`
+  - `GET /projects/admin/:id`
+  - `POST /projects`
+  - `PUT /projects/:id`
+  - `DELETE /projects/:id`
+
+**Resumes**
+- Public:
+  - `GET /resumes/public`
+  - `GET /resumes/public/:id`
+- Admin:
+  - `GET /resumes`
+  - `GET /resumes/:id`
+  - `POST /resumes`
+  - `PUT /resumes/:id`
+  - `DELETE /resumes/:id`
+- User:
+  - `GET /resumes/user`
+
+**Stats (Admin only)**
+- `GET /stats/general/overview`
+- `GET /stats/user`
+- `GET /stats/blog`
+- `GET /stats/project`
+- `GET /stats/traffic`
+- `GET /stats/resume`
+
+**Health**
+- `GET /health`
 
 ### Auth API
 
@@ -137,6 +247,9 @@ model User {
   role            Role     @default(USER)
   profilePicture  String?
   provider        String    @default("CREDENTIAL") // GOOGLE | GITHUB | CREDENTIAL
+  resumes         Resume[]
+  Project         Project[]
+  Blog            Blog[]
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
@@ -309,6 +422,24 @@ DELETE /users/:id
 
 Manages blog posts with thumbnail uploads.
 
+#### Public Query Params
+
+Use these optional query parameters on `GET /blogs` and `GET /blogs/:id`:
+
+- `q`: Full-text search across title/content/slug.
+- `tag`: Filter by a specific tag (case-insensitive).
+- `featured`: `true` or `false` to filter featured blogs.
+- `published`: `true` or `false` to filter by publish state.
+- `page`: Page number (default `1`).
+- `limit`: Page size (default `20`).
+- `includeDrafts`: Admin-only; `true` or `false` (default `true` for admin routes).
+- `includeDeleted`: Admin-only; `true` to include soft-deleted blogs.
+
+**Examples**
+- `GET /blogs?q=typescript&page=1&limit=10`
+- `GET /blogs?tag=backend&featured=true`
+- `GET /blogs?published=false` (admin only)
+
 #### Blog Model
 
 ```prisma
@@ -316,13 +447,25 @@ model Blog {
   id        String   @id @default(uuid())
   title     String
   slug      String   @unique
-  tag       String[]
+  tags      String[] @default([])
   thumbnail String
   content   String
   authorId  String
   author    User     @relation(fields: [authorId], references: [id])
+  views     Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  BlogView  BlogView[]
+}
+
+model BlogView {
+  id     String   @id @default(uuid())
+  blogId String
+  blog   Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  count  Int      @default(1)
+  date   DateTime @default(now())
+
+  @@unique([blogId, date])
 }
 ```
 
@@ -333,10 +476,11 @@ export type SafeBlog = {
   id: string;
   title: string;
   slug: string;
-  tag: string[];
+  tags: string[];
   thumbnail: string;
   content: string;
   authorId: string;
+  views: number;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -404,7 +548,7 @@ POST /blogs
   | title | string | Yes |
   | slug | string | Yes |
   | content | string | Yes |
-  | tag | string[] | No |
+  | tags | string[] | No |
   | thumbnail | file | Yes |
 - **Validation**: Title min 3 chars, content min 50 chars, tags array of strings.
 - **Example**:
@@ -414,8 +558,8 @@ POST /blogs
     -F "title=My Blog" \
     -F "slug=my-blog" \
     -F "content=This is a detailed blog post content..." \
-    -F "tag=tech" \
-    -F "tag=backend" \
+    -F "tags=tech" \
+    -F "tags=backend" \
     -F "thumbnail=@/path/to/thumbnail.jpg"
   ```
 - **Response** (201):
@@ -485,17 +629,38 @@ DELETE /blogs/:id
 
 Manages projects with multiple image uploads.
 
+#### Public Query Params
+
+Use these optional query parameters on `GET /projects` and `GET /projects/:id`:
+
+- `q`: Full-text search across title/description/slug/techStack.
+- `featured`: `true` or `false` to filter featured projects.
+- `published`: `true` or `false` to filter by publish state.
+- `page`: Page number (default `1`).
+- `limit`: Page size (default `20`).
+- `includeDrafts`: Admin-only; `true` or `false` (default `true` for admin routes).
+- `includeDeleted`: Admin-only; `true` to include soft-deleted projects.
+
+**Examples**
+- `GET /projects?q=portfolio`
+- `GET /projects?featured=true&limit=6`
+- `GET /projects?published=false` (admin only)
+
 #### Project Model
 
 ```prisma
 model Project {
   id          String   @id @default(uuid())
   title       String
+  slug        String   @unique
   description String
   techStack   String[]
   images      String[]
   authorId    String
   author      User     @relation(fields: [authorId], references: [id])
+  videoUrl    String?
+  liveUrl     String?
+  repoUrl     String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -507,10 +672,14 @@ model Project {
 export type SafeProject = {
   id: string;
   title: string;
+  slug: string;
   description: string;
   techStack: string[];
   images: string[];
   authorId: string;
+  videoUrl?: string;
+  liveUrl?: string;
+  repoUrl?: string;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -523,10 +692,11 @@ GET /projects
 ```
 
 - **Access**: Public
-- **Description**: Retrieves all projects.
+- **Description**: Retrieves published projects.
 - **Example**:
   ```bash
-  curl -X GET http://localhost:5000/api/v1/projects
+  curl -X GET http://localhost:5000/api/v1/projects \
+    -H "Cookie: next-auth.session-token=<JWT_COOKIE>"
   ```
 - **Response** (200):
   ```json
@@ -547,10 +717,11 @@ GET /projects/:id
 ```
 
 - **Access**: Public
-- **Description**: Retrieves a project by ID.
+- **Description**: Retrieves a published project by ID.
 - **Example**:
   ```bash
-  curl -X GET http://localhost:5000/api/v1/projects/uuid1
+  curl -X GET http://localhost:5000/api/v1/projects/uuid1 \
+    -H "Cookie: next-auth.session-token=<JWT_COOKIE>"
   ```
 - **Response** (200):
   ```json
@@ -576,17 +747,24 @@ POST /projects
   | Field | Type | Required |
   |-------------|----------|----------|
   | title | string | Yes |
+  | slug | string | Yes |
   | description | string | Yes |
   | techStack | string[] | No |
+  | videoUrl | string | No |
+  | liveUrl | string | No |
+  | repoUrl | string | No |
   | images | file[] | No |
 - **Example**:
   ```bash
   curl -X POST http://localhost:5000/api/v1/projects \
     -H "Cookie: next-auth.session-token=<JWT_COOKIE>" \
     -F "title=My Project" \
+    -F "slug=my-project" \
     -F "description=A portfolio project" \
     -F "techStack=Node.js" \
     -F "techStack=Prisma" \
+    -F "liveUrl=https://example.com" \
+    -F "repoUrl=https://github.com/example/repo" \
     -F "images=@/path/to/image1.jpg" \
     -F "images=@/path/to/image2.jpg"
   ```
@@ -706,6 +884,24 @@ GET /resumes
 
 - **Access**: Auth (Admin only)
 - **Description**: Retrieves all resumes.
+
+#### Get Public Resumes
+
+```
+GET /resumes/public
+```
+
+- **Access**: Public
+- **Description**: Retrieves only public resumes.
+
+#### Get Public Resume
+
+```
+GET /resumes/public/:id
+```
+
+- **Access**: Public
+- **Description**: Retrieves a public resume by ID.
 - **Example**:
   ```bash
   curl -X GET http://localhost:5000/api/v1/resumes \
@@ -884,11 +1080,11 @@ All API responses follow this structure:
 2. **Install Dependencies**:
 
    ```bash
-   npm install
+   bun install
    ```
 
 3. **Set Up Environment Variables**:
-   Create a `.env` file in the root directory with the following:
+   Create a `.env` or `.env.local` file in the root directory with the following:
 
    ```
    DATABASE_URL="postgresql://user:password@localhost:5432/dbname?schema=public"
@@ -901,18 +1097,18 @@ All API responses follow this structure:
 4. **Generate Prisma Client**:
 
    ```bash
-   npm run generate
+   bun prisma generate
    ```
 
 5. **Apply Database Migrations**:
 
    ```bash
-   npm run migrate:dev
+   bun prisma migrate dev
    ```
 
 6. **Seed Database** (Optional):
    ```bash
-   npm run seed
+   bun run seed
    ```
 
 ## Running the Application
@@ -922,7 +1118,7 @@ All API responses follow this structure:
 Run the development server with hot reloading:
 
 ```bash
-npm run dev
+bun run dev
 ```
 
 - Server runs at: `http://localhost:5000`
@@ -933,10 +1129,10 @@ Build and run the application for production:
 
 ```bash
 # Build TypeScript code
-npm run build
+bun run build
 
 # Start production server
-npm start
+bun run start
 ```
 
 - Builds to `/dist` folder
@@ -946,12 +1142,45 @@ npm start
 
 Use tools like Postman or Insomnia to test endpoints. Ensure the `Cookie` header includes the NextAuth session token for authenticated requests. Example requests are provided above for each endpoint.
 
+## System Flowchart
+
+```mermaid
+flowchart TD
+  Client[Portfolio Frontend] -->|Public GET| PublicAPI[Public API Routes]
+  Admin[Admin Dashboard] -->|Auth + Cookies| AdminAPI[Admin API Routes]
+
+  PublicAPI --> Blogs[Blogs]
+  PublicAPI --> Projects[Projects]
+  PublicAPI --> Resumes[Public Resumes]
+  PublicAPI --> Health[Health Check]
+
+  AdminAPI --> Auth[Auth]
+  AdminAPI --> Users[Users]
+  AdminAPI --> Blogs
+  AdminAPI --> Projects
+  AdminAPI --> Resumes
+  AdminAPI --> Stats[Stats]
+
+  Blogs --> Prisma[Prisma 7 ORM]
+  Projects --> Prisma
+  Resumes --> Prisma
+  Users --> Prisma
+  Stats --> Prisma
+  Auth --> Prisma
+
+  Prisma --> DB[(PostgreSQL)]
+  Blogs --> Cloudinary[(Cloudinary)]
+  Projects --> Cloudinary
+  Resumes --> Cloudinary
+```
+
 ## Notes
 
 - **File Uploads**: Managed via Cloudinary, with automatic deletion of old files on update.
 - **Security**: `checkAuth` middleware ensures private routes are secure.
 - **Admin Privileges**: Only admins can manage users and delete certain resources.
 - **Flexible Data**: Resume JSON fields (experiences, education, etc.) support arbitrary structures.
+- **Prisma 7 Config**: Schema lives in `prisma/` (multi-file), and connection settings are defined in `prisma.config.ts` using `DATABASE_URL` from `.env` or `.env.local`.
 - **Production Deployment**: Use a process manager like PM2 for production stability.
 
 ## License

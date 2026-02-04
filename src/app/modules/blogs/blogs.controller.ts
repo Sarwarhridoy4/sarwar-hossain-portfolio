@@ -8,7 +8,26 @@ import { SafeBlog } from "../../../types";
 
 // Get all blogs
 const getAllBlogs = catchAsync(async (req: Request, res: Response) => {
-  const blogs: SafeBlog[] = await BlogService.getAllBlogs();
+  const isAdmin = req.user?.role === "ADMIN";
+  const includeDrafts = isAdmin
+    ? req.query.includeDrafts !== "false"
+    : false;
+  const includeDeleted = isAdmin && req.query.includeDeleted === "true";
+
+  const blogs: SafeBlog[] = await BlogService.getAllBlogs({
+    q: req.query.q as string | undefined,
+    tag: req.query.tag as string | undefined,
+    featured: req.query.featured
+      ? req.query.featured === "true"
+      : undefined,
+    published: req.query.published
+      ? req.query.published === "true"
+      : undefined,
+    includeDrafts,
+    includeDeleted,
+    page: req.query.page ? Number(req.query.page) : undefined,
+    limit: req.query.limit ? Number(req.query.limit) : undefined,
+  });
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
@@ -19,7 +38,11 @@ const getAllBlogs = catchAsync(async (req: Request, res: Response) => {
 
 // Get a single blog by ID
 const getBlogById = catchAsync(async (req: Request, res: Response) => {
-  const blog: SafeBlog = await BlogService.getBlogById(req.params.id);
+  const isAdmin = req.user?.role === "ADMIN";
+  const blog: SafeBlog = await BlogService.getBlogById(req.params.id, {
+    includeDrafts: isAdmin ? req.query.includeDrafts !== "false" : false,
+    includeDeleted: isAdmin && req.query.includeDeleted === "true",
+  });
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
@@ -30,7 +53,11 @@ const getBlogById = catchAsync(async (req: Request, res: Response) => {
 
 // Create a new blog (Admin only)
 const createBlog = catchAsync(async (req: Request, res: Response) => {
-  const blog: SafeBlog = await BlogService.createBlog(req.body, req.file);
+  const blog: SafeBlog = await BlogService.createBlog(
+    req.body,
+    req.file,
+    req.user?.id
+  );
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.CREATED,
@@ -44,8 +71,9 @@ const updateBlog = catchAsync(async (req: Request, res: Response) => {
   const blog: SafeBlog = await BlogService.updateBlog(
     req.params.id,
     req.body,
-    req.file
-  ); // pass file
+    req.file,
+    req.user?.id
+  );
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,

@@ -7,6 +7,6 @@ const router = Router();
 
 // Admin-only stats routes
 
-router.get("/users", checkAuth(UserRole.ADMIN), StatsController.getUserStats);
+router.get("/", checkAuth(UserRole.ADMIN), StatsController.getUserStats);
 
 export const UserStatsRoutes = router;

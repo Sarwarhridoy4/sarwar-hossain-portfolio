@@ -1,0 +1,22 @@
+model User {
+  id             String   @id @default(uuid())
+  name           String
+  email          String   @unique
+  password       String
+  role           Role     @default(USER)
+  profilePicture String?  // optional profile picture
+  provider       String   @default("CREDENTIAL") // "GOOGLE" | "GITHUB" | "CREDENTIAL"
+  resumes        Resume[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  Project Project[]
+  Blog    Blog[]
+
+  createdBlogs    Blog[]    @relation("BlogCreatedBy")
+  updatedBlogs    Blog[]    @relation("BlogUpdatedBy")
+  createdProjects Project[] @relation("ProjectCreatedBy")
+  updatedProjects Project[] @relation("ProjectUpdatedBy")
+  createdResumes  Resume[]  @relation("ResumeCreatedBy")
+  updatedResumes  Resume[]  @relation("ResumeUpdatedBy")
+}

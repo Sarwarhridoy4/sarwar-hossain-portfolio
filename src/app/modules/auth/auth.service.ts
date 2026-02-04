@@ -1,11 +1,10 @@
-import { PrismaClient, Role } from "@prisma/client";
+import { Role } from "@prisma/client";
 import bcryptjs from "bcryptjs";
 import { env } from "../../../config/env";
 import AppError from "../../../helpers/errorhelper/AppError";
 import { StatusCodes } from "http-status-codes";
 import { createUserTokens } from "../../../utils/userToken";
-
-const prisma = new PrismaClient();
+import { prisma } from "../../../config/db";
 
 // ------------------
 // Types

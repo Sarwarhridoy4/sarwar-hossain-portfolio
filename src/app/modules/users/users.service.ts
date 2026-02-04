@@ -1,14 +1,13 @@
-import { PrismaClient, Role } from "@prisma/client";
+import { Role } from "@prisma/client";
 import bcryptjs from "bcryptjs";
 import AppError from "../../../helpers/errorhelper/AppError";
 import { env } from "../../../config/env";
 import { SafeUser } from "../../../types";
+import { prisma } from "../../../config/db";
 import {
   uploadBufferToCloudinary,
   deleteImageFromCloudinary,
 } from "../../../config/cloudinary";
-
-const prisma = new PrismaClient();
 
 const getAllUsers = async (): Promise<SafeUser[]> => {
   return prisma.user.findMany({

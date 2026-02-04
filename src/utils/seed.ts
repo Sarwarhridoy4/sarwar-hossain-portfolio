@@ -1,9 +1,7 @@
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { env } from "../config/env";
 import { UserRole } from "../types";
-
-const prisma = new PrismaClient();
+import { prisma } from "../config/db";
 
 async function main() {
   const hashedPassword = await bcrypt.hash(

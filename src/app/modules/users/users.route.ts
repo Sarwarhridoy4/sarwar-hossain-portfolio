@@ -5,6 +5,8 @@ import { UserRole } from "../../../types";
 import { multerUpload } from "../../../config/multer";
 import { uploadToCloudinary } from "../../../utils/uploadToCloudinary";
 import { checkAuth } from "../../middlewares/checkAuth";
+import { validateRequest } from "../../middlewares/validateRequest";
+import { createUserSchema, updateUserSchema } from "./users.validation";
 
 const router = Router();
 
@@ -16,6 +18,7 @@ router.post(
   checkAuth(UserRole.ADMIN),
   multerUpload.single("profilePicture"),
   uploadToCloudinary("profile-image"),
+  validateRequest(createUserSchema),
   UserControllers.createUser
 ); // Create a new user
 router.put(
@@ -23,6 +26,7 @@ router.put(
   checkAuth(UserRole.ADMIN),
   multerUpload.single("profilePicture"),
   uploadToCloudinary("profile-image"),
+  validateRequest(updateUserSchema),
   UserControllers.updateUser
 ); // Update existing user
 router.delete("/:id", checkAuth(UserRole.ADMIN), UserControllers.deleteUser); // Delete user
