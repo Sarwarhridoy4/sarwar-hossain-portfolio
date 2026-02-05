@@ -1,7 +1,7 @@
 import http, { Server } from "http";
-import { prisma } from "./config/db";
+import { prisma } from "./src/config/db";
 import app from "./app";
-import { env } from "./config/env";
+import { env } from "./src/config/env";
 
 let server: Server | null = null;
 
@@ -21,7 +21,7 @@ async function startServer() {
     server = http.createServer(app);
     server.listen(env.PORT, () => {
       console.log(
-        `🚀 Server is running on${env.NODE_ENV} environment on port ${env.PORT}`
+        `🚀 Server is running on ${env.NODE_ENV} environment on port ${env.PORT}`,
       );
     });
 

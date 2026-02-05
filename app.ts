@@ -3,12 +3,12 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import express, { type Request, type Response, Application } from "express";
 import { StatusCodes } from "http-status-codes";
-import { router } from "./routes";
-import { globalErrorHandler } from "./app/middlewares/globalerrorHandler";
-import notFound from "./app/middlewares/notFound";
-import { env } from "./config/env";
+import { router } from "./src/routes";
+import { globalErrorHandler } from "./src/app/middlewares/globalerrorHandler";
+import notFound from "./src/app/middlewares/notFound";
+import { env } from "./src/config/env";
 import swaggerUi from "swagger-ui-express";
-import { swaggerSpec } from "./config/swagger";
+import { swaggerSpec } from "./src/config/swagger";
 
 const app: Application = express();
 
