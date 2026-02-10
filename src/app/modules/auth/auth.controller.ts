@@ -5,11 +5,8 @@ import { sendResponse } from "../../../utils/sendResponse";
 import { AuthServices } from "./auth.service";
 import { uploadBufferToCloudinary } from "../../../config/cloudinary";
 import AppError from "../../../helpers/errorhelper/AppError";
-import { setAuthCookie } from "../../../utils/setCookie";
-import {
-  createNewAccessTokenWithRefreshToken,
-  createUserTokens,
-} from "../../../utils/userToken";
+import { clearAuthCookie, setAuthCookie } from "../../../utils/setCookie";
+import { createNewAccessTokenWithRefreshToken } from "../../../utils/userToken";
 
 /**
  * 📝 Create user (Signup) — NO tokens here
@@ -84,80 +81,58 @@ const refreshToken = catchAsync(async (req: Request, res: Response) => {
   // Returns { accessToken, expiresIn }
   const newTokens = await createNewAccessTokenWithRefreshToken(refreshToken);
 
-  // Pass only accessToken to setAuthCookie
-  setAuthCookie(res, { accessToken: newTokens.accessToken });
+  // Rotate refresh token and update cookies
+  setAuthCookie(res, {
+    accessToken: newTokens.accessToken,
+    refreshToken: newTokens.refreshToken,
+  });
 
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
     message: "Access token refreshed",
-    data: { accessToken: newTokens.accessToken },
-  });
-});
-
-
-/**
- * 🌐 Google Auth — Returns Tokens
- */
-const authWithGoogle = catchAsync(async (req: Request, res: Response) => {
-  const user = await AuthServices.authWithProvider(req.body);
-
-  const tokens = createUserTokens({
-    id: String(user.id),
-    email: user.email,
-    role: user.role,
-  });
-
-  setAuthCookie(res, {
-    accessToken: tokens.accessToken,
-    refreshToken: tokens.refreshToken,
-  });
-
-  sendResponse(res, {
-    success: true,
-    statusCode: StatusCodes.OK,
-    message: "Google login successful",
     data: {
-      ...user,
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
+      accessToken: newTokens.accessToken,
+      refreshToken: newTokens.refreshToken,
     },
   });
 });
 
 /**
- * 🐙 GitHub Auth — Returns Tokens
+ * 👤 Get current user profile (cookie auth)
  */
-const authWithGithub = catchAsync(async (req: Request, res: Response) => {
-  const user = await AuthServices.authWithProvider(req.body);
+const getMe = catchAsync(async (req: Request, res: Response) => {
+  if (!req.user?.id) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, "Unauthorized");
+  }
 
-  const tokens = createUserTokens({
-    id: String(user.id),
-    email: user.email,
-    role: user.role,
-  });
-
-  setAuthCookie(res, {
-    accessToken: tokens.accessToken,
-    refreshToken: tokens.refreshToken,
-  });
+  const user = await AuthServices.getUserById(req.user.id);
 
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
-    message: "GitHub login successful",
-    data: {
-      ...user,
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-    },
+    message: "User profile fetched",
+    data: user,
   });
 });
+
+/**
+ * 🚪 Logout - clears auth cookies
+ */
+const logout = catchAsync(async (_req: Request, res: Response) => {
+  clearAuthCookie(res);
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "Logged out successfully",
+  });
+});
+
 
 export const UserControllers = {
   createUser,
   loginWithEmailAndPassword,
   refreshToken,
-  authWithGoogle,
-  authWithGithub,
+  getMe,
+  logout,
 };

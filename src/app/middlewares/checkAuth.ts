@@ -13,7 +13,7 @@ export const checkAuth =
       const accessToken = req.cookies?.accessToken;
 
       if (!accessToken) {
-        throw new AppError(403, "No token received");
+        throw new AppError(StatusCodes.UNAUTHORIZED, "No token received");
       }
 
       const verifiedToken = verifyToken(

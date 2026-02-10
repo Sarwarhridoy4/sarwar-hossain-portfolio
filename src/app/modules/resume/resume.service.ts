@@ -172,22 +172,24 @@ const updateResume = async (
     updatedPhoto = result.secure_url;
   }
 
-  const updatedResume = await prisma.resume.update({
-    where: { id },
-    data: {
-      ...payload,
-      ...(Object.prototype.hasOwnProperty.call(payload, "isPublic")
-        ? {
-            isPublic:
-              typeof payload.isPublic === "boolean"
-                ? payload.isPublic
-                : parseBoolean(payload.isPublic),
-          }
-        : {}),
-      professionalPhoto: updatedPhoto,
-      updatedById: actorId,
-    },
-  });
+  const updatedResume = await prisma.$transaction(async (tx) =>
+    tx.resume.update({
+      where: { id },
+      data: {
+        ...payload,
+        ...(Object.prototype.hasOwnProperty.call(payload, "isPublic")
+          ? {
+              isPublic:
+                typeof payload.isPublic === "boolean"
+                  ? payload.isPublic
+                  : parseBoolean(payload.isPublic),
+            }
+          : {}),
+        professionalPhoto: updatedPhoto,
+        updatedById: actorId,
+      },
+    })
+  );
 
   return {
     ...updatedResume,
@@ -212,9 +214,11 @@ const deleteResume = async (id: string) => {
     await deleteImageFromCloudinary(existing.professionalPhoto);
   }
 
-  await prisma.resume.update({
-    where: { id },
-    data: { deletedAt: new Date() },
+  await prisma.$transaction(async (tx) => {
+    await tx.resume.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
   });
   return { message: "Resume deleted successfully" };
 };

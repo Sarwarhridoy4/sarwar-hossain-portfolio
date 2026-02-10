@@ -206,10 +206,12 @@ const updateProject = async (
     data.publishedAt = published ? new Date() : null;
   }
 
-  return prisma.project.update({
-    where: { id },
-    data,
-  });
+  return prisma.$transaction(async (tx) =>
+    tx.project.update({
+      where: { id },
+      data,
+    })
+  );
 };
 
 const deleteProject = async (id: string) => {
@@ -223,9 +225,11 @@ const deleteProject = async (id: string) => {
     await deleteImageFromCloudinary(url);
   }
 
-  await prisma.project.update({
-    where: { id },
-    data: { deletedAt: new Date() },
+  await prisma.$transaction(async (tx) => {
+    await tx.project.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
   });
 
   return { message: "Project deleted successfully" };

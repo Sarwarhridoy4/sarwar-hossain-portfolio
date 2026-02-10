@@ -193,8 +193,9 @@ export const swaggerSpec = {
             type: "object",
             properties: {
               accessToken: { type: "string" },
+              refreshToken: { type: "string" },
             },
-            required: ["accessToken"],
+            required: ["accessToken", "refreshToken"],
           },
         },
         required: ["success", "message", "data"],
@@ -349,42 +350,6 @@ export const swaggerSpec = {
           "createdAt",
           "updatedAt",
         ],
-      },
-      OAuthPayload: {
-        type: "object",
-        properties: {
-          account: {
-            type: "object",
-            properties: {
-              provider: { type: "string", enum: ["google", "github"] },
-              type: { type: "string", example: "oauth" },
-              providerAccountId: { type: "string" },
-              access_token: { type: "string" },
-              expires_at: { type: "number", nullable: true },
-              refresh_token: { type: "string", nullable: true },
-              refresh_token_expires_in: { type: "number", nullable: true },
-              token_type: { type: "string", nullable: true },
-              scope: { type: "string", nullable: true },
-              id_token: { type: "string", nullable: true },
-            },
-            required: ["provider", "type", "providerAccountId", "access_token"],
-          },
-          profile: {
-            type: "object",
-            additionalProperties: true,
-          },
-          user: {
-            type: "object",
-            properties: {
-              id: { type: "string" },
-              name: { type: "string" },
-              email: { type: "string" },
-              image: { type: "string", nullable: true },
-            },
-            required: ["id", "name", "email"],
-          },
-        },
-        required: ["account", "profile", "user"],
       },
       StatsOverview: {
         type: "object",
@@ -681,53 +646,40 @@ export const swaggerSpec = {
         },
       },
     },
-    "/api/v1/auth/google": {
-      post: {
+    "/api/v1/auth/me": {
+      get: {
         tags: ["Auth"],
-        summary: "Google OAuth login",
-        requestBody: {
-          required: true,
-          content: {
-            "application/json": {
-              schema: { $ref: "#/components/schemas/OAuthPayload" },
-            },
-          },
-        },
+        summary: "Get current user profile",
+        security: [{ cookieAuth: [] }],
         responses: {
           "200": {
-            description: "Google login successful",
+            description: "User profile fetched",
             content: {
               "application/json": {
-                schema: { $ref: "#/components/schemas/LoginResponse" },
+                schema: { $ref: "#/components/schemas/ApiResponseUser" },
               },
             },
           },
-          "400": { description: "Invalid OAuth payload", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } } },
+          "401": { description: "Invalid token", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } } },
+          "403": { description: "Forbidden", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } } },
         },
       },
     },
-    "/api/v1/auth/github": {
+    "/api/v1/auth/logout": {
       post: {
         tags: ["Auth"],
-        summary: "GitHub OAuth login",
-        requestBody: {
-          required: true,
-          content: {
-            "application/json": {
-              schema: { $ref: "#/components/schemas/OAuthPayload" },
-            },
-          },
-        },
+        summary: "Logout and clear cookies",
+        security: [{ cookieAuth: [] }],
         responses: {
           "200": {
-            description: "GitHub login successful",
+            description: "Logged out",
             content: {
               "application/json": {
-                schema: { $ref: "#/components/schemas/LoginResponse" },
+                schema: { $ref: "#/components/schemas/ApiMessage" },
               },
             },
           },
-          "400": { description: "Invalid OAuth payload", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } } },
+          "401": { description: "Invalid token", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } } },
         },
       },
     },

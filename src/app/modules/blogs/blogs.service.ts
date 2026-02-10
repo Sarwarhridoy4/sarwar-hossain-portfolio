@@ -274,32 +274,34 @@ const updateBlog = async (
     data.publishedAt = published ? new Date() : null;
   }
 
-  const updatedBlog = await prisma.blog.update({
-    where: { id },
-    data,
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      tags: true,
-      thumbnail: true,
-      content: true,
-      seoTitle: true,
-      seoDescription: true,
-      ogImage: true,
-      featured: true,
-      priority: true,
-      published: true,
-      publishedAt: true,
-      authorId: true,
-      createdById: true,
-      updatedById: true,
-      views: true,
-      deletedAt: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-  });
+  const updatedBlog = await prisma.$transaction(async (tx) =>
+    tx.blog.update({
+      where: { id },
+      data,
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        tags: true,
+        thumbnail: true,
+        content: true,
+        seoTitle: true,
+        seoDescription: true,
+        ogImage: true,
+        featured: true,
+        priority: true,
+        published: true,
+        publishedAt: true,
+        authorId: true,
+        createdById: true,
+        updatedById: true,
+        views: true,
+        deletedAt: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    })
+  );
 
   return updatedBlog;
 };
@@ -313,9 +315,11 @@ const deleteBlog = async (id: string) => {
   // Delete thumbnail if exists
   if (blog.thumbnail) await deleteImageFromCloudinary(blog.thumbnail);
 
-  await prisma.blog.update({
-    where: { id },
-    data: { deletedAt: new Date() },
+  await prisma.$transaction(async (tx) => {
+    await tx.blog.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
   });
   return { message: "Blog deleted successfully" };
 };

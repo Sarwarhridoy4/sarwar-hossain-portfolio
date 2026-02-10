@@ -71,9 +71,21 @@ export const createNewAccessTokenWithRefreshToken = async (
       env.JWT_EXPIRES_IN
     );
 
+    const newRefreshToken = generateToken(
+      {
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+      },
+      env.JWT_REFRESH_SECRET,
+      env.JWT_REFRESH_EXPIRES
+    );
+
     return {
       accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
       expiresIn: env.JWT_EXPIRES_IN,
+      refreshExpiresIn: env.JWT_REFRESH_EXPIRES,
     };
   } catch (err) {
     console.error("❌ Refresh token error:", err);

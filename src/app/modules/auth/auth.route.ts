@@ -3,6 +3,8 @@ import { UserControllers } from "./auth.controller";
 import { validateRequest } from "../../middlewares/validateRequest";
 import { signupSchema, loginSchema } from "./auth.validator";
 import { multerUpload } from "../../../config/multer";
+import { checkAuth } from "../../middlewares/checkAuth";
+import { UserRole } from "../../../types";
 
 const router = Router();
 
@@ -39,16 +41,21 @@ router.post(
 router.post("/refresh-token", UserControllers.refreshToken);
 
 /**
- * 🌐 Google social login
- * - Returns accessToken + refreshToken
- * - Also sets cookies
+ * 👤 Current user (cookie auth)
  */
-router.post("/google", UserControllers.authWithGoogle);
+router.get(
+  "/me",
+  checkAuth(UserRole.ADMIN, UserRole.USER),
+  UserControllers.getMe
+);
 
 /**
- * 🐙 GitHub social login
- * - Same as Google login
+ * 🚪 Logout (clear cookies)
  */
-router.post("/github", UserControllers.authWithGithub);
+router.post(
+  "/logout",
+  checkAuth(UserRole.ADMIN, UserRole.USER),
+  UserControllers.logout
+);
 
 export const AuthRoutes = router;

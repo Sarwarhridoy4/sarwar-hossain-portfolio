@@ -134,20 +134,22 @@ const updateUser = async (
     }
   }
 
-  return prisma.user.update({
-    where: { id },
-    data,
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      profilePicture: true,
-      provider: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-  });
+  return prisma.$transaction(async (tx) =>
+    tx.user.update({
+      where: { id },
+      data,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        profilePicture: true,
+        provider: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    })
+  );
 };
 
 const deleteUser = async (id: string) => {
@@ -160,7 +162,9 @@ const deleteUser = async (id: string) => {
   }
 
   // Delete DB user
-  await prisma.user.delete({ where: { id } });
+  await prisma.$transaction(async (tx) => {
+    await tx.user.delete({ where: { id } });
+  });
 
   return { message: "User deleted successfully" };
 };

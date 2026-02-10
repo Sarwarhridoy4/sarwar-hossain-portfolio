@@ -21,49 +21,6 @@ interface LoginPayload {
   password: string;
 }
 
-interface OAuthAccount {
-  provider: "google" | "github";
-  type: "oauth";
-  providerAccountId: string;
-  access_token: string;
-  expires_at?: number;
-  refresh_token?: string;
-  refresh_token_expires_in?: number;
-  token_type?: string;
-  scope?: string;
-  id_token?: string; // Google
-}
-
-interface OAuthProfileGoogle {
-  sub: string;
-  email: string;
-  email_verified: boolean;
-  name: string;
-  picture?: string;
-  given_name?: string;
-  family_name?: string;
-}
-
-interface OAuthProfileGitHub {
-  id: number;
-  login: string;
-  avatar_url?: string;
-  name?: string;
-  email?: string;
-  [key: string]: any; // allow extra fields
-}
-
-// Combined OAuth payload type
-interface OAuthPayload {
-  account: OAuthAccount;
-  profile: OAuthProfileGoogle | OAuthProfileGitHub;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    image?: string;
-  };
-}
 
 // ------------------
 // Return Type
@@ -149,62 +106,30 @@ const loginWithEmailAndPassword = async (
 };
 
 /**
- * 🌐 OAuth login (Google / GitHub)
+ * 👤 Get user profile by id
  */
-const authWithProvider = async (
-  payload: OAuthPayload
-): Promise<UserWithTokens> => {
-  const email = payload.profile.email || payload.user.email;
-  if (!email) throw new AppError(400, "Email is required for OAuth login");
-
-  let user = await prisma.user.findUnique({ where: { email } });
-
-  const profilePicture =
-    payload.profile.picture ||
-    (payload.profile as OAuthProfileGitHub).avatar_url ||
-    null;
-
-  if (!user) {
-    user = await prisma.user.create({
-      data: {
-        name: payload.user.name,
-        email,
-        password: "", // OAuth users don’t need passwords
-        role: "USER",
-        profilePicture,
-        provider: payload.account.provider.toUpperCase() as "GOOGLE" | "GITHUB",
-      },
-    });
-  } else {
-    // Update provider + profilePicture if changed
-    const updates: Partial<typeof user> = {};
-    if (profilePicture && profilePicture !== user.profilePicture)
-      updates.profilePicture = profilePicture;
-    if (user.provider !== payload.account.provider.toUpperCase())
-      updates.provider = payload.account.provider.toUpperCase() as
-        | "GOOGLE"
-        | "GITHUB";
-
-    if (Object.keys(updates).length > 0) {
-      user = await prisma.user.update({
-        where: { id: user.id },
-        data: updates,
-      });
-    }
-  }
-
-  const tokens = createUserTokens({
-    id: user.id,
-    email: user.email,
-    role: user.role,
+const getUserById = async (id: string) => {
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      profilePicture: true,
+      provider: true,
+      createdAt: true,
+      updatedAt: true,
+    },
   });
 
-  const { password, ...safeUser } = user;
-  return { ...safeUser, tokens };
+  if (!user) throw new AppError(StatusCodes.NOT_FOUND, "User not found");
+
+  return user;
 };
 
 export const AuthServices = {
   signupUser,
   loginWithEmailAndPassword,
-  authWithProvider,
+  getUserById,
 };

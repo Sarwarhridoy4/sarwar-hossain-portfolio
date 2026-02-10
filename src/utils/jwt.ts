@@ -1,4 +1,4 @@
-import jwt, { JwtPayload, SignOptions } from "jsonwebtoken";
+import jwt, { JwtPayload, SignOptions, VerifyOptions } from "jsonwebtoken";
 import AppError from "../helpers/errorhelper/AppError"; // adjust path
 
 // Strongly typed JWT payload
@@ -14,10 +14,12 @@ export interface AuthJwtPayload extends JwtPayload {
 export const generateToken = (
   payload: AuthJwtPayload,
   secret: string,
-  expiresIn: string
+  expiresIn: SignOptions["expiresIn"],
+  options: SignOptions = {}
 ): string => {
   try {
-    return jwt.sign(payload, secret, { expiresIn } as SignOptions);
+    if (!secret) throw new AppError(500, "JWT secret is not configured");
+    return jwt.sign(payload, secret, { ...options, expiresIn });
   } catch (err: any) {
     throw new AppError(500, "Failed to generate token", err?.message);
   }
@@ -26,9 +28,18 @@ export const generateToken = (
 /**
  * ✅ Verify token and return decoded payload
  */
-export const verifyToken = (token: string, secret: string): AuthJwtPayload => {
+export const verifyToken = (
+  token: string,
+  secret: string,
+  options: VerifyOptions = {}
+): AuthJwtPayload => {
   try {
-    return jwt.verify(token, secret) as AuthJwtPayload;
+    if (!secret) throw new AppError(500, "JWT secret is not configured");
+    const decoded = jwt.verify(token, secret, options);
+    if (typeof decoded === "string") {
+      throw new AppError(401, "Invalid token payload");
+    }
+    return decoded as AuthJwtPayload;
   } catch (err: any) {
     throw new AppError(401, "Invalid or expired token", err?.message);
   }
