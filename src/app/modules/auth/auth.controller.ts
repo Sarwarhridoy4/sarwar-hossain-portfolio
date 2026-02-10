@@ -123,7 +123,6 @@ const logout = catchAsync(async (_req: Request, res: Response) => {
   clearAuthCookie(res);
   sendResponse(res, {
     success: true,
-    
     statusCode: StatusCodes.OK,
     message: "Logged out successfully",
     data: null,
