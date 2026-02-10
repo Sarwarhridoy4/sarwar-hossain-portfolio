@@ -10,7 +10,8 @@ import { TrafficStatsRoutes } from "../app/modules/stats/traffic/trafficstats.ro
 import { BlogStatsRoutes } from "../app/modules/stats/blog/blogstats.routes";
 import { ProjectStatsRoutes } from "../app/modules/stats/project/projectstats.route";
 import { ResumeStatsRoutes } from "../app/modules/stats/resume/resumestats.route";
-import { HealthRoutes } from "./health";
+import { HealthRoutes } from "../app/modules/health/health.routes";
+
 
 export const router = Router();
 

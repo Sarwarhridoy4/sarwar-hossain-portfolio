@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { prisma } from "../config/db";
-import { env } from "../config/env";
+import { prisma } from "../../../config/db";
+import { env } from "process";
 
 export const HealthRoutes = Router();
 

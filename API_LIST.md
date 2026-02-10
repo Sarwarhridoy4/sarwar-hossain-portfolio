@@ -1,6 +1,6 @@
 # API List (Remote)
 
-Base URL (remote): `https://sarwar-portfolio-server-opal.vercel.app/api/v1`
+Base URL (remote): `https://sarwars-portfolio-server.vercel.app/api/v1`
 
 **Endpoints**
 
@@ -53,7 +53,7 @@ Base URL (remote): `https://sarwar-portfolio-server-opal.vercel.app/api/v1`
 <a id="example-auth-signup"></a>
 Signup
 ```bash
-curl -X POST "https://sarwar-portfolio-server-opal.vercel.app/api/v1/auth/signup" \
+curl -X POST "https://sarwars-portfolio-server.vercel.app/api/v1/auth/signup" \
   -H "Content-Type: application/json" \
   -d '{"name":"John Doe","email":"john@example.com","password":"123456"}'
 ```
@@ -61,7 +61,7 @@ curl -X POST "https://sarwar-portfolio-server-opal.vercel.app/api/v1/auth/signup
 <a id="example-auth-login"></a>
 Login
 ```bash
-curl -X POST "https://sarwar-portfolio-server-opal.vercel.app/api/v1/auth/login" \
+curl -X POST "https://sarwars-portfolio-server.vercel.app/api/v1/auth/login" \
   -H "Content-Type: application/json" \
   -d '{"email":"john@example.com","password":"123456"}'
 ```
@@ -69,7 +69,7 @@ curl -X POST "https://sarwar-portfolio-server-opal.vercel.app/api/v1/auth/login"
 <a id="example-auth-refresh-token"></a>
 Refresh Token
 ```bash
-curl -X POST "https://sarwar-portfolio-server-opal.vercel.app/api/v1/auth/refresh-token" \
+curl -X POST "https://sarwars-portfolio-server.vercel.app/api/v1/auth/refresh-token" \
   -H "Content-Type: application/json" \
   -d '{"refreshToken":"<refresh_token>"}'
 ```
@@ -77,14 +77,14 @@ curl -X POST "https://sarwar-portfolio-server-opal.vercel.app/api/v1/auth/refres
 <a id="example-auth-me"></a>
 Me
 ```bash
-curl -X GET "https://sarwar-portfolio-server-opal.vercel.app/api/v1/auth/me" \
+curl -X GET "https://sarwars-portfolio-server.vercel.app/api/v1/auth/me" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>"
 ```
 
 <a id="example-auth-logout"></a>
 Logout
 ```bash
-curl -X POST "https://sarwar-portfolio-server-opal.vercel.app/api/v1/auth/logout" \
+curl -X POST "https://sarwars-portfolio-server.vercel.app/api/v1/auth/logout" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>"
 ```
 
@@ -93,21 +93,21 @@ curl -X POST "https://sarwar-portfolio-server-opal.vercel.app/api/v1/auth/logout
 <a id="example-users-get-all"></a>
 Get Users
 ```bash
-curl -X GET "https://sarwar-portfolio-server-opal.vercel.app/api/v1/users" \
+curl -X GET "https://sarwars-portfolio-server.vercel.app/api/v1/users" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>"
 ```
 
 <a id="example-users-get-one"></a>
 Get User
 ```bash
-curl -X GET "https://sarwar-portfolio-server-opal.vercel.app/api/v1/users/uuid1" \
+curl -X GET "https://sarwars-portfolio-server.vercel.app/api/v1/users/uuid1" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>"
 ```
 
 <a id="example-users-create"></a>
 Create User
 ```bash
-curl -X POST "https://sarwar-portfolio-server-opal.vercel.app/api/v1/users" \
+curl -X POST "https://sarwars-portfolio-server.vercel.app/api/v1/users" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>" \
   -F "name=John Doe" \
   -F "email=john@example.com" \
@@ -119,7 +119,7 @@ curl -X POST "https://sarwar-portfolio-server-opal.vercel.app/api/v1/users" \
 <a id="example-users-update"></a>
 Update User
 ```bash
-curl -X PUT "https://sarwar-portfolio-server-opal.vercel.app/api/v1/users/uuid1" \
+curl -X PUT "https://sarwars-portfolio-server.vercel.app/api/v1/users/uuid1" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>" \
   -F "name=Updated Name" \
   -F "profilePicture=@/path/to/new_image.jpg"
@@ -128,7 +128,7 @@ curl -X PUT "https://sarwar-portfolio-server-opal.vercel.app/api/v1/users/uuid1"
 <a id="example-users-delete"></a>
 Delete User
 ```bash
-curl -X DELETE "https://sarwar-portfolio-server-opal.vercel.app/api/v1/users/uuid1" \
+curl -X DELETE "https://sarwars-portfolio-server.vercel.app/api/v1/users/uuid1" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>"
 ```
 
@@ -137,33 +137,33 @@ curl -X DELETE "https://sarwar-portfolio-server-opal.vercel.app/api/v1/users/uui
 <a id="example-blogs-get-all"></a>
 Get Blogs
 ```bash
-curl -X GET "https://sarwar-portfolio-server-opal.vercel.app/api/v1/blogs?q=typescript&page=1&limit=10"
+curl -X GET "https://sarwars-portfolio-server.vercel.app/api/v1/blogs?q=typescript&page=1&limit=10"
 ```
 
 <a id="example-blogs-get-one"></a>
 Get Blog
 ```bash
-curl -X GET "https://sarwar-portfolio-server-opal.vercel.app/api/v1/blogs/uuid1"
+curl -X GET "https://sarwars-portfolio-server.vercel.app/api/v1/blogs/uuid1"
 ```
 
 <a id="example-blogs-admin-all"></a>
 Admin Blogs
 ```bash
-curl -X GET "https://sarwar-portfolio-server-opal.vercel.app/api/v1/blogs/admin?includeDrafts=true" \
+curl -X GET "https://sarwars-portfolio-server.vercel.app/api/v1/blogs/admin?includeDrafts=true" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>"
 ```
 
 <a id="example-blogs-admin-one"></a>
 Admin Blog
 ```bash
-curl -X GET "https://sarwar-portfolio-server-opal.vercel.app/api/v1/blogs/admin/uuid1" \
+curl -X GET "https://sarwars-portfolio-server.vercel.app/api/v1/blogs/admin/uuid1" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>"
 ```
 
 <a id="example-blogs-create"></a>
 Create Blog
 ```bash
-curl -X POST "https://sarwar-portfolio-server-opal.vercel.app/api/v1/blogs" \
+curl -X POST "https://sarwars-portfolio-server.vercel.app/api/v1/blogs" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>" \
   -F "title=My Blog" \
   -F "slug=my-blog" \
@@ -176,7 +176,7 @@ curl -X POST "https://sarwar-portfolio-server-opal.vercel.app/api/v1/blogs" \
 <a id="example-blogs-update"></a>
 Update Blog
 ```bash
-curl -X PUT "https://sarwar-portfolio-server-opal.vercel.app/api/v1/blogs/uuid1" \
+curl -X PUT "https://sarwars-portfolio-server.vercel.app/api/v1/blogs/uuid1" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>" \
   -F "title=Updated Blog Title" \
   -F "thumbnail=@/path/to/new_thumbnail.jpg"
@@ -185,7 +185,7 @@ curl -X PUT "https://sarwar-portfolio-server-opal.vercel.app/api/v1/blogs/uuid1"
 <a id="example-blogs-delete"></a>
 Delete Blog
 ```bash
-curl -X DELETE "https://sarwar-portfolio-server-opal.vercel.app/api/v1/blogs/uuid1" \
+curl -X DELETE "https://sarwars-portfolio-server.vercel.app/api/v1/blogs/uuid1" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>"
 ```
 
@@ -194,33 +194,33 @@ curl -X DELETE "https://sarwar-portfolio-server-opal.vercel.app/api/v1/blogs/uui
 <a id="example-projects-get-all"></a>
 Get Projects
 ```bash
-curl -X GET "https://sarwar-portfolio-server-opal.vercel.app/api/v1/projects?featured=true&limit=6"
+curl -X GET "https://sarwars-portfolio-server.vercel.app/api/v1/projects?featured=true&limit=6"
 ```
 
 <a id="example-projects-get-one"></a>
 Get Project
 ```bash
-curl -X GET "https://sarwar-portfolio-server-opal.vercel.app/api/v1/projects/uuid1"
+curl -X GET "https://sarwars-portfolio-server.vercel.app/api/v1/projects/uuid1"
 ```
 
 <a id="example-projects-admin-all"></a>
 Admin Projects
 ```bash
-curl -X GET "https://sarwar-portfolio-server-opal.vercel.app/api/v1/projects/admin?includeDrafts=true" \
+curl -X GET "https://sarwars-portfolio-server.vercel.app/api/v1/projects/admin?includeDrafts=true" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>"
 ```
 
 <a id="example-projects-admin-one"></a>
 Admin Project
 ```bash
-curl -X GET "https://sarwar-portfolio-server-opal.vercel.app/api/v1/projects/admin/uuid1" \
+curl -X GET "https://sarwars-portfolio-server.vercel.app/api/v1/projects/admin/uuid1" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>"
 ```
 
 <a id="example-projects-create"></a>
 Create Project
 ```bash
-curl -X POST "https://sarwar-portfolio-server-opal.vercel.app/api/v1/projects" \
+curl -X POST "https://sarwars-portfolio-server.vercel.app/api/v1/projects" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>" \
   -F "title=My Project" \
   -F "slug=my-project" \
@@ -236,7 +236,7 @@ curl -X POST "https://sarwar-portfolio-server-opal.vercel.app/api/v1/projects" \
 <a id="example-projects-update"></a>
 Update Project
 ```bash
-curl -X PUT "https://sarwar-portfolio-server-opal.vercel.app/api/v1/projects/uuid1" \
+curl -X PUT "https://sarwars-portfolio-server.vercel.app/api/v1/projects/uuid1" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>" \
   -F "title=Updated Project Title" \
   -F "images=@/path/to/new_image.jpg"
@@ -245,7 +245,7 @@ curl -X PUT "https://sarwar-portfolio-server-opal.vercel.app/api/v1/projects/uui
 <a id="example-projects-delete"></a>
 Delete Project
 ```bash
-curl -X DELETE "https://sarwar-portfolio-server-opal.vercel.app/api/v1/projects/uuid1" \
+curl -X DELETE "https://sarwars-portfolio-server.vercel.app/api/v1/projects/uuid1" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>"
 ```
 
@@ -254,40 +254,40 @@ curl -X DELETE "https://sarwar-portfolio-server-opal.vercel.app/api/v1/projects/
 <a id="example-resumes-get-all"></a>
 Get Resumes
 ```bash
-curl -X GET "https://sarwar-portfolio-server-opal.vercel.app/api/v1/resumes" \
+curl -X GET "https://sarwars-portfolio-server.vercel.app/api/v1/resumes" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>"
 ```
 
 <a id="example-resumes-get-public"></a>
 Get Public Resumes
 ```bash
-curl -X GET "https://sarwar-portfolio-server-opal.vercel.app/api/v1/resumes/public"
+curl -X GET "https://sarwars-portfolio-server.vercel.app/api/v1/resumes/public"
 ```
 
 <a id="example-resumes-get-public-one"></a>
 Get Public Resume
 ```bash
-curl -X GET "https://sarwar-portfolio-server-opal.vercel.app/api/v1/resumes/public/uuid1"
+curl -X GET "https://sarwars-portfolio-server.vercel.app/api/v1/resumes/public/uuid1"
 ```
 
 <a id="example-resumes-get-user"></a>
 Get User Resumes
 ```bash
-curl -X GET "https://sarwar-portfolio-server-opal.vercel.app/api/v1/resumes/user" \
+curl -X GET "https://sarwars-portfolio-server.vercel.app/api/v1/resumes/user" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>"
 ```
 
 <a id="example-resumes-get-one"></a>
 Get Resume
 ```bash
-curl -X GET "https://sarwar-portfolio-server-opal.vercel.app/api/v1/resumes/uuid1" \
+curl -X GET "https://sarwars-portfolio-server.vercel.app/api/v1/resumes/uuid1" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>"
 ```
 
 <a id="example-resumes-create"></a>
 Create Resume
 ```bash
-curl -X POST "https://sarwar-portfolio-server-opal.vercel.app/api/v1/resumes" \
+curl -X POST "https://sarwars-portfolio-server.vercel.app/api/v1/resumes" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>" \
   -F "title=Software Engineer Resume" \
   -F "summary=Experienced developer" \
@@ -300,7 +300,7 @@ curl -X POST "https://sarwar-portfolio-server-opal.vercel.app/api/v1/resumes" \
 <a id="example-resumes-update"></a>
 Update Resume
 ```bash
-curl -X PUT "https://sarwar-portfolio-server-opal.vercel.app/api/v1/resumes/uuid1" \
+curl -X PUT "https://sarwars-portfolio-server.vercel.app/api/v1/resumes/uuid1" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>" \
   -F "title=Updated Resume Title" \
   -F "professionalPhoto=@/path/to/new_photo.jpg"
@@ -309,7 +309,7 @@ curl -X PUT "https://sarwar-portfolio-server-opal.vercel.app/api/v1/resumes/uuid
 <a id="example-resumes-delete"></a>
 Delete Resume
 ```bash
-curl -X DELETE "https://sarwar-portfolio-server-opal.vercel.app/api/v1/resumes/uuid1" \
+curl -X DELETE "https://sarwars-portfolio-server.vercel.app/api/v1/resumes/uuid1" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>"
 ```
 
@@ -318,42 +318,42 @@ curl -X DELETE "https://sarwar-portfolio-server-opal.vercel.app/api/v1/resumes/u
 <a id="example-stats-general"></a>
 General Overview
 ```bash
-curl -X GET "https://sarwar-portfolio-server-opal.vercel.app/api/v1/stats/general/overview" \
+curl -X GET "https://sarwars-portfolio-server.vercel.app/api/v1/stats/general/overview" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>"
 ```
 
 <a id="example-stats-user"></a>
 User Stats
 ```bash
-curl -X GET "https://sarwar-portfolio-server-opal.vercel.app/api/v1/stats/user" \
+curl -X GET "https://sarwars-portfolio-server.vercel.app/api/v1/stats/user" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>"
 ```
 
 <a id="example-stats-blog"></a>
 Blog Stats
 ```bash
-curl -X GET "https://sarwar-portfolio-server-opal.vercel.app/api/v1/stats/blog" \
+curl -X GET "https://sarwars-portfolio-server.vercel.app/api/v1/stats/blog" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>"
 ```
 
 <a id="example-stats-project"></a>
 Project Stats
 ```bash
-curl -X GET "https://sarwar-portfolio-server-opal.vercel.app/api/v1/stats/project" \
+curl -X GET "https://sarwars-portfolio-server.vercel.app/api/v1/stats/project" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>"
 ```
 
 <a id="example-stats-traffic"></a>
 Traffic Stats
 ```bash
-curl -X GET "https://sarwar-portfolio-server-opal.vercel.app/api/v1/stats/traffic" \
+curl -X GET "https://sarwars-portfolio-server.vercel.app/api/v1/stats/traffic" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>"
 ```
 
 <a id="example-stats-resume"></a>
 Resume Stats
 ```bash
-curl -X GET "https://sarwar-portfolio-server-opal.vercel.app/api/v1/stats/resume" \
+curl -X GET "https://sarwars-portfolio-server.vercel.app/api/v1/stats/resume" \
   -H "Cookie: next-auth.session-token=<JWT_COOKIE>"
 ```
 
@@ -362,5 +362,5 @@ curl -X GET "https://sarwar-portfolio-server-opal.vercel.app/api/v1/stats/resume
 <a id="example-health"></a>
 Health
 ```bash
-curl -X GET "https://sarwar-portfolio-server-opal.vercel.app/api/v1/health"
+curl -X GET "https://sarwars-portfolio-server.vercel.app/api/v1/health"
 ```
