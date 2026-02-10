@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import { StatusCodes } from "http-status-codes";
 import { generateToken, verifyToken, AuthJwtPayload } from "./jwt";
+import type { SignOptions } from "jsonwebtoken";
 import { env } from "../config/env";
 import AppError from "../helpers/errorhelper/AppError";
 import { prisma } from "../config/db";
@@ -13,6 +14,8 @@ export const createUserTokens = (user: {
   email: string;
   role: string;
 }) => {
+  const accessExpiresIn = env.JWT_EXPIRES_IN as SignOptions["expiresIn"];
+  const refreshExpiresIn = env.JWT_REFRESH_EXPIRES as SignOptions["expiresIn"];
   const jwtPayload: AuthJwtPayload = {
     userId: user.id,
     email: user.email,
@@ -23,14 +26,14 @@ export const createUserTokens = (user: {
   const accessToken = generateToken(
     jwtPayload,
     env.JWT_SECRET_KEY,
-    env.JWT_EXPIRES_IN
+    accessExpiresIn
   );
 
   // Refresh token (long lifespan)
   const refreshToken = generateToken(
     jwtPayload,
     env.JWT_REFRESH_SECRET,
-    env.JWT_REFRESH_EXPIRES
+    refreshExpiresIn
   );
 
   return {
@@ -68,7 +71,7 @@ export const createNewAccessTokenWithRefreshToken = async (
         role: user.role,
       },
       env.JWT_SECRET_KEY,
-      env.JWT_EXPIRES_IN
+      env.JWT_EXPIRES_IN as SignOptions["expiresIn"]
     );
 
     const newRefreshToken = generateToken(
@@ -78,7 +81,7 @@ export const createNewAccessTokenWithRefreshToken = async (
         role: user.role,
       },
       env.JWT_REFRESH_SECRET,
-      env.JWT_REFRESH_EXPIRES
+      env.JWT_REFRESH_EXPIRES as SignOptions["expiresIn"]
     );
 
     return {
